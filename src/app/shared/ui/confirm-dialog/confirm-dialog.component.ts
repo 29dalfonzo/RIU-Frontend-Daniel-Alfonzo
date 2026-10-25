@@ -63,7 +63,7 @@ export interface ConfirmDialogData {
       line-height: 1.25;
       letter-spacing: 0.04em;
       color: var(--mat-sys-on-surface);
-      text-shadow: 2px 2px 0 var(--app-accent);
+      text-shadow: 2px 2px 0 var(--app-name-shadow);
     }
 
     .message {

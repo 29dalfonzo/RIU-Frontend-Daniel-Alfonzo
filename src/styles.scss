@@ -32,6 +32,10 @@ html {
   --app-shadow: 5px 5px 0 var(--app-outline);
   --app-shadow-small: 3px 3px 0 var(--app-outline);
   --app-halftone: light-dark(rgb(27 27 31 / 7%), rgb(255 255 255 / 5%));
+  // Text shadows must contrast with the text fill in both themes: the Material primary turns
+  // pastel in dark mode, so titles use a fixed deep red instead.
+  --app-title-shadow: #c62828;
+  --app-name-shadow: light-dark(var(--app-accent), #c62828);
   --app-publisher-marvel: #d32f2f;
   --app-publisher-dc: #0064d2;
   --app-publisher-other: #7a4dd8;
@@ -110,7 +114,7 @@ body {
   letter-spacing: 0.05em;
   line-height: 1;
   color: var(--mat-sys-on-surface);
-  text-shadow: 3px 3px 0 var(--mat-sys-primary);
+  text-shadow: 3px 3px 0 var(--app-title-shadow);
 }
 
 .comic-panel {

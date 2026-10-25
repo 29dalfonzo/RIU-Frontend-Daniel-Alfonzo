@@ -1,9 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { Subject } from 'rxjs';
 
 import { AppComponent } from './app.component';
 import { routes } from './app.routes';
+import { LoadingService } from './core/loading/loading.service';
 import { HERO_INITIAL_STATE, HERO_LATENCY_MS } from './features/heroes/data-access/hero.service';
 import { SEARCH_DEBOUNCE_MS } from './features/heroes/pages/hero-list-page/hero-list-page.component';
 import { HERO_FIXTURES, settle } from './features/heroes/testing/hero.fixtures';
@@ -32,6 +34,23 @@ describe('AppComponent routing', () => {
     const brand = (fixture.nativeElement as HTMLElement).querySelector('a.brand');
     expect(brand?.textContent).toContain('Super Heroes');
     expect(brand?.getAttribute('href')).toBe('/heroes');
+  });
+
+  it('shows the loading bar only while an operation is in flight', async () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const operation = new Subject<void>();
+    const loadingBar = (): Element | null =>
+      (fixture.nativeElement as HTMLElement).querySelector('[data-testid="loading"]');
+    await fixture.whenStable();
+    expect(loadingBar()).toBeNull();
+
+    operation.pipe(TestBed.inject(LoadingService).track()).subscribe();
+    await fixture.whenStable();
+    expect(loadingBar()).not.toBeNull();
+
+    operation.complete();
+    await fixture.whenStable();
+    expect(loadingBar()).toBeNull();
   });
 
   it('redirects the root path to the hero list', async () => {

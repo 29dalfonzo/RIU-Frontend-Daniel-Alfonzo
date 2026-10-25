@@ -1,6 +1,7 @@
 import { Injectable, InjectionToken, inject, signal } from '@angular/core';
 import { Observable, map, timer } from 'rxjs';
 
+import { LoadingService } from '../../../core/loading/loading.service';
 import {
   DuplicateHeroNameError,
   Hero,
@@ -35,10 +36,13 @@ const normalize = <T extends HeroDraft>(hero: T): T => ({
 /**
  * In-memory hero store. State lives in the service (no backend) and every
  * operation is exposed as a cold Observable that resolves after a simulated latency.
+ * Since no HttpClient request is made, operations report progress to LoadingService
+ * themselves, which is what the HTTP loading interceptor would do against a real API.
  */
 @Injectable({ providedIn: 'root' })
 export class HeroService {
   private readonly latencyMs = inject(HERO_LATENCY_MS);
+  private readonly loading = inject(LoadingService);
   private readonly heroes = signal<readonly Hero[]>(freezeAll(inject(HERO_INITIAL_STATE)));
 
   getAll(): Observable<readonly Hero[]> {
@@ -82,7 +86,10 @@ export class HeroService {
 
   /** Runs the operation lazily, on subscription, once the simulated latency has elapsed. */
   private respond<T>(operation: () => T): Observable<T> {
-    return timer(this.latencyMs).pipe(map(() => operation()));
+    return timer(this.latencyMs).pipe(
+      map(() => operation()),
+      this.loading.track(),
+    );
   }
 
   private commit(heroes: readonly Hero[]): void {

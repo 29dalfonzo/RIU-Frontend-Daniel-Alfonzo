@@ -3,12 +3,20 @@
   min-height: 100%;
 }
 
-.toolbar {
+.app-header {
   position: sticky;
   top: 0;
   z-index: 2;
+}
+
+.toolbar {
   background-color: var(--mat-sys-primary);
   color: var(--mat-sys-on-primary);
+}
+
+// Reserves the bar height so the layout does not jump when loading starts.
+.loading-slot {
+  height: 4px;
 }
 
 .brand {

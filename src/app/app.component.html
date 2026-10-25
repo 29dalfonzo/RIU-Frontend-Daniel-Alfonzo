@@ -1,9 +1,17 @@
-<mat-toolbar class="toolbar">
-  <a class="brand" routerLink="/heroes">
-    <mat-icon aria-hidden="true">shield</mat-icon>
-    <span>Super Heroes</span>
-  </a>
-</mat-toolbar>
+<header class="app-header">
+  <mat-toolbar class="toolbar">
+    <a class="brand" routerLink="/heroes">
+      <mat-icon aria-hidden="true">shield</mat-icon>
+      <span>Super Heroes</span>
+    </a>
+  </mat-toolbar>
+
+  <div class="loading-slot">
+    @if (isLoading()) {
+      <mat-progress-bar mode="indeterminate" aria-label="Loading" data-testid="loading" />
+    }
+  </div>
+</header>
 
 <main class="content">
   <router-outlet />

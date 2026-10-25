@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 
+import { LoadingService } from '../../../core/loading/loading.service';
 import { DuplicateHeroNameError, Hero, HeroNotFoundError } from '../models/hero.model';
 import { HERO_INITIAL_STATE, HERO_LATENCY_MS, HeroService } from './hero.service';
 
@@ -188,5 +189,15 @@ describe('HeroService', () => {
     const heroes = await firstValueFrom(service.getAll());
 
     expect(Object.isFrozen(heroes)).toBe(true);
+  });
+
+  it('reports the app as loading while an operation is in flight', async () => {
+    const loading = TestBed.inject(LoadingService);
+
+    const deletion = firstValueFrom(service.delete(1));
+    expect(loading.isLoading()).toBe(true);
+
+    await deletion;
+    expect(loading.isLoading()).toBe(false);
   });
 });

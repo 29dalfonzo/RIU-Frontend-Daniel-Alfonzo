@@ -12,6 +12,7 @@ Single-page application to maintain a catalogue of super heroes, built for the M
 | RxJS | 7.8 |
 | TypeScript | 5.9 |
 | Vitest (+ coverage-v8) | 4.1 |
+| Playwright | 1.64 |
 | angular-eslint / Prettier | 21.4 / 3.8 |
 | Node.js | 24 LTS |
 
@@ -54,6 +55,7 @@ docker build --target test .
 | `npm test` | Unit tests in watch mode |
 | `npm run test:ci` | Unit tests once |
 | `npm run test:coverage` | Unit tests once with coverage; **fails below 80%** (statements, branches, functions, lines) |
+| `npm run e2e` | Playwright end-to-end tests (desktop + mobile Chrome), starts its own dev server |
 | `npm run lint` | angular-eslint (TypeScript + template accessibility rules) |
 | `npm run format` | Prettier |
 
@@ -156,6 +158,10 @@ Errors appear once a field is touched or the form is submitted. The form is full
 - Tests go through the public surface: the DOM, Angular Material **component harnesses** (paginator, select, dialog, button) and `RouterTestingHarness` for routing.
 - Material animations are disabled globally in tests (`src/test-providers.ts`), so dialogs close synchronously.
 - `npm run test:coverage` enforces a minimum of **80%** coverage; the current suite is at ~98% statements and branches.
+
+### End-to-end
+
+`npm run e2e` runs [Playwright](https://playwright.dev) against a real dev server, on desktop and mobile (Pixel 7) Chrome. The suite covers pagination, filtering, creating with validations and upper case, rejecting a duplicate name, editing, confirming or cancelling a deletion, the loading bar, and redirecting an unknown hero id. The first run needs the browser: `npx playwright install chromium`.
 
 ## Commit convention
 

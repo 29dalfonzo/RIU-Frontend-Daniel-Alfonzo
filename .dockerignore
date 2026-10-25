@@ -8,3 +8,5 @@ odd
 npm-debug.log
 Dockerfile
 docker-compose.yml
+test-results
+playwright-report

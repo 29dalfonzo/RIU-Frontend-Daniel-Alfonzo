@@ -1,25 +1,82 @@
 <section class="page">
   <header class="page-header">
-    <h1>Super heroes</h1>
-    <button mat-flat-button type="button" data-testid="add-hero" (click)="onAdd()">
+    <div class="title-group">
+      <h1 class="page-title">Heroes</h1>
+      @if (countLabel()) {
+        <span class="count-badge" data-testid="hero-count">{{ countLabel() }}</span>
+      }
+    </div>
+    <button
+      mat-flat-button
+      type="button"
+      class="add-button"
+      data-testid="add-hero"
+      (click)="onAdd()"
+    >
       <mat-icon>add</mat-icon>
       Add hero
     </button>
   </header>
 
-  <app-hero-search [term]="term()" (termChange)="onTermChange($event)" />
+  <div class="comic-panel">
+    <app-hero-search [term]="term()" (termChange)="onTermChange($event)" />
+    <p class="cdk-visually-hidden" aria-live="polite" data-testid="results-announcer">
+      {{ announcement() }}
+    </p>
 
-  @if (sortedHeroes(); as heroes) {
-    <app-hero-table
-      [heroes]="heroes"
-      [pageIndex]="pageIndex()"
-      [pageSize]="size()"
-      [pageSizeOptions]="pageSizeOptions"
-      [sort]="sort()"
-      (pageChange)="onPage($event)"
-      (sortChange)="onSort($event)"
-      (edit)="onEdit($event)"
-      (remove)="onRemove($event)"
-    />
-  }
+    @if (sortedHeroes(); as heroes) {
+      @if (heroes.length) {
+        <app-hero-table
+          [heroes]="heroes"
+          [pageIndex]="pageIndex()"
+          [pageSize]="size()"
+          [pageSizeOptions]="pageSizeOptions"
+          [sort]="sort()"
+          [highlightId]="highlightId"
+          (pageChange)="onPage($event)"
+          (sortChange)="onSort($event)"
+          (edit)="onEdit($event)"
+          (remove)="onRemove($event)"
+        />
+      } @else {
+        <div class="empty-state" data-testid="empty-state">
+          <span class="empty-burst" aria-hidden="true">?!</span>
+          @if (q()) {
+            <p class="empty-title">No heroes match "{{ q() }}"</p>
+            <p class="empty-text">Try another name or clear the filter.</p>
+            <button
+              mat-stroked-button
+              type="button"
+              data-testid="clear-filter"
+              (click)="onClearFilter()"
+            >
+              Clear filter
+            </button>
+          } @else {
+            <p class="empty-title">No heroes registered yet</p>
+            <p class="empty-text">The city needs protection. Register the first hero.</p>
+            <button mat-flat-button type="button" (click)="onAdd()">
+              <mat-icon>add</mat-icon>
+              Add hero
+            </button>
+          }
+        </div>
+      }
+    } @else {
+      <div
+        class="skeleton"
+        data-testid="list-skeleton"
+        aria-busy="true"
+        aria-label="Loading heroes"
+      >
+        @for (row of skeletonRows; track row) {
+          <div class="skeleton-row">
+            <span class="skeleton-avatar"></span>
+            <span class="skeleton-line"></span>
+            <span class="skeleton-line short"></span>
+          </div>
+        }
+      </div>
+    }
+  </div>
 </section>

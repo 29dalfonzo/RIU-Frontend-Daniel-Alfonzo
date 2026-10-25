@@ -62,14 +62,19 @@ export class HeroFormPageComponent {
       .subscribe({
         next: (hero) => {
           this.notifications.success(`${hero.name} was ${action}`);
-          this.backToList();
+          this.backToList(hero.id);
         },
         error: (error: Error) => this.notifications.error(error.message),
       });
   }
 
-  protected backToList(): void {
-    void this.router.navigate(['/heroes'], { queryParams: this.listQuery.lastQuery() });
+  /** Returns to the list view the user came from; a saved hero is passed along to be highlighted. */
+  protected backToList(highlightId?: HeroId): void {
+    const queryParams = this.listQuery.lastQuery();
+    void this.router.navigate(
+      ['/heroes'],
+      highlightId === undefined ? { queryParams } : { queryParams, state: { highlightId } },
+    );
   }
 
   private loadHero(id: HeroId): Observable<Hero> {

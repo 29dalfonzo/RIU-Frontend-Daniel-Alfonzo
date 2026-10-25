@@ -139,6 +139,71 @@ describe('HeroListPageComponent', () => {
     });
   });
 
+  describe('feedback', () => {
+    it('shows a loading skeleton until the first results arrive', async () => {
+      await open('/heroes/new');
+      await harness.navigateByUrl('/heroes?q=bat');
+      harness.fixture.detectChanges();
+
+      expect(element().querySelector('[data-testid="list-skeleton"]')).not.toBeNull();
+
+      await settle(harness.fixture);
+
+      expect(element().querySelector('[data-testid="list-skeleton"]')).toBeNull();
+      expect(renderedNames()).toEqual(['BATMAN']);
+    });
+
+    it('shows how many heroes are registered and announces filtered results', async () => {
+      expect(element().querySelector('[data-testid="hero-count"]')?.textContent?.trim()).toBe(
+        '7 heroes',
+      );
+
+      await search('man');
+
+      const announcer = element().querySelector('[data-testid="results-announcer"]');
+      expect(announcer?.textContent?.trim()).toBe('6 heroes found');
+    });
+
+    it('offers to clear the filter when nothing matches', async () => {
+      await search('xyz');
+
+      const empty = element().querySelector('[data-testid="empty-state"]');
+      expect(empty?.textContent).toContain('No heroes match "xyz"');
+
+      await click('[data-testid="clear-filter"]');
+
+      expect(router.url).toBe('/heroes');
+      expect(renderedNames()).toHaveLength(5);
+    });
+
+    it('highlights the hero the user just saved, on its page', async () => {
+      // Coming back from a form, as HeroFormPageComponent does after saving.
+      await open('/heroes/new');
+      await router.navigate(['/heroes'], { state: { highlightId: 7 } });
+      await settle(harness.fixture);
+
+      expect(router.url).toBe('/heroes?page=2');
+      const highlighted = element().querySelector('tr.highlighted [data-testid="hero-name"]');
+      expect(highlighted?.textContent?.trim()).toBe('THOR');
+    });
+
+    it('focuses the search box when the user presses "/"', async () => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: '/' }));
+      await settle(harness.fixture);
+
+      expect(document.activeElement).toBe(element().querySelector('app-hero-search input'));
+    });
+
+    it('does not steal "/" while the user is typing in a field', async () => {
+      const input = element().querySelector('app-hero-search input') as HTMLInputElement;
+      const typing = new KeyboardEvent('keydown', { key: '/', bubbles: true, cancelable: true });
+
+      input.dispatchEvent(typing);
+
+      expect(typing.defaultPrevented).toBe(false);
+    });
+  });
+
   it('navigates to the empty form when adding a hero', async () => {
     await click('[data-testid="add-hero"]');
 

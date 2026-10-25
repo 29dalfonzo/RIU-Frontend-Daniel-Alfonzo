@@ -77,7 +77,7 @@ describe('AppComponent routing', () => {
     await harness.navigateByUrl('/');
     await settle(harness.fixture);
 
-    expect(text()).toContain('Super heroes');
+    expect(text()).toContain('Heroes');
     expect(text()).toContain('SPIDERMAN');
   });
 
@@ -99,6 +99,6 @@ describe('AppComponent routing', () => {
     await harness.navigateByUrl('/villains');
     await settle(harness.fixture);
 
-    expect(text()).toContain('Super heroes');
+    expect(text()).toContain('Heroes');
   });
 });

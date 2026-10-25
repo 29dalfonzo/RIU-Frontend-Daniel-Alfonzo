@@ -7,7 +7,9 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { HeroSort, HeroSortField } from '../../models/hero-sort';
-import { Hero } from '../../models/hero.model';
+import { Hero, HeroId } from '../../models/hero.model';
+import { HeroAvatarComponent } from '../hero-avatar/hero-avatar.component';
+import { PublisherBadgeComponent } from '../publisher-badge/publisher-badge.component';
 
 /**
  * Presentational, controlled table: the parent owns page and sort state (kept in the URL)
@@ -22,6 +24,8 @@ import { Hero } from '../../models/hero.model';
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
+    HeroAvatarComponent,
+    PublisherBadgeComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './hero-table.component.html',
@@ -33,6 +37,8 @@ export class HeroTableComponent {
   readonly pageSize = input(5);
   readonly pageSizeOptions = input<readonly number[]>([5, 10, 25]);
   readonly sort = input<HeroSort>();
+  /** Hero to flash, e.g. the one that was just created or edited. */
+  readonly highlightId = input<HeroId>();
 
   readonly edit = output<Hero>();
   readonly remove = output<Hero>();

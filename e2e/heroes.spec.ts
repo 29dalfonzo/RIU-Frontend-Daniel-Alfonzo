@@ -34,7 +34,21 @@ test.describe('Super heroes maintenance', () => {
     await heroes.filter('xyz');
 
     await expect(heroes.heroNames).toHaveCount(0);
-    await expect(page.getByText('No heroes found.')).toBeVisible();
+    await expect(page.getByText('No heroes match "xyz"')).toBeVisible();
+    await expect(page).toHaveURL(/\/heroes\?q=xyz$/);
+
+    await page.getByRole('button', { name: 'Clear filter' }).click();
+
+    await expect(heroes.heroNames).toHaveCount(5);
+    await expect(page).toHaveURL(/\/heroes$/);
+  });
+
+  test('restores filter, sort and page from a shared link', async ({ page }) => {
+    await page.goto('/heroes?q=man&sort=name:asc&page=2');
+
+    await expect(heroes.search).toHaveValue('man');
+    // Seed matches for "man" sorted by name: AQUAMAN … SPIDERMAN | SUPERMAN, WONDER WOMAN.
+    await expect(heroes.heroNames).toHaveText(['SUPERMAN', 'WONDER WOMAN']);
   });
 
   test('creates a hero with validation and the name in upper case', async ({ page }) => {
@@ -54,10 +68,10 @@ test.describe('Super heroes maintenance', () => {
     });
     await heroes.save();
 
-    await expect(page).toHaveURL(/\/heroes$/);
+    // The new hero is the 13th: the list jumps to its page and highlights it.
+    await expect(page).toHaveURL(/\/heroes\?page=3$/);
     await expect(heroes.snackbar).toContainText('SHE-HULK was created');
-    await heroes.filter('she');
-    await expect(heroes.heroNames).toHaveText(['SHE-HULK']);
+    await expect(page.locator('tr.highlighted')).toContainText('SHE-HULK');
   });
 
   test('rejects a duplicated hero name', async ({ page }) => {

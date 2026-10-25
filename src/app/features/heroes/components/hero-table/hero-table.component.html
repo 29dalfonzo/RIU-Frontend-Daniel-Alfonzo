@@ -1,78 +1,89 @@
-@if (heroes().length) {
-  <div class="table-container">
-    <table
-      mat-table
-      matSort
-      [dataSource]="visibleHeroes()"
-      [matSortActive]="sort()?.field ?? ''"
-      [matSortDirection]="sort()?.direction ?? ''"
-      (matSortChange)="onSort($event)"
-      aria-label="Super heroes"
-    >
-      <ng-container matColumnDef="id">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header="id">ID</th>
-        <td mat-cell *matCellDef="let hero">{{ hero.id }}</td>
-      </ng-container>
+<div class="table-container">
+  <table
+    mat-table
+    matSort
+    [dataSource]="visibleHeroes()"
+    [matSortActive]="sort()?.field ?? ''"
+    [matSortDirection]="sort()?.direction ?? ''"
+    (matSortChange)="onSort($event)"
+    aria-label="Super heroes"
+  >
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="id">ID</th>
+      <td mat-cell *matCellDef="let hero" class="muted">#{{ hero.id }}</td>
+    </ng-container>
 
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header="name">Name</th>
-        <td mat-cell *matCellDef="let hero" data-testid="hero-name">{{ hero.name }}</td>
-      </ng-container>
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="name">Name</th>
+      <td mat-cell *matCellDef="let hero">
+        <span class="hero-cell">
+          <app-hero-avatar [name]="hero.name" [publisher]="hero.publisher" />
+          <span class="hero-text">
+            <span class="hero-name" data-testid="hero-name">{{ hero.name }}</span>
+            <span class="publisher-caption">{{ hero.publisher }}</span>
+          </span>
+        </span>
+      </td>
+    </ng-container>
 
-      <ng-container matColumnDef="realName">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header="realName">Real name</th>
-        <td mat-cell *matCellDef="let hero">{{ hero.realName }}</td>
-      </ng-container>
+    <ng-container matColumnDef="realName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="realName">Real name</th>
+      <td mat-cell *matCellDef="let hero">{{ hero.realName }}</td>
+    </ng-container>
 
-      <ng-container matColumnDef="publisher">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header="publisher">Publisher</th>
-        <td mat-cell *matCellDef="let hero">{{ hero.publisher }}</td>
-      </ng-container>
+    <ng-container matColumnDef="publisher">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="publisher">Publisher</th>
+      <td mat-cell *matCellDef="let hero">
+        <app-publisher-badge [publisher]="hero.publisher" />
+      </td>
+    </ng-container>
 
-      <ng-container matColumnDef="firstAppearance">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header="firstAppearance">
-          First appearance
-        </th>
-        <td mat-cell *matCellDef="let hero">{{ hero.firstAppearance }}</td>
-      </ng-container>
+    <ng-container matColumnDef="firstAppearance">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="firstAppearance">First appearance</th>
+      <td mat-cell *matCellDef="let hero">{{ hero.firstAppearance }}</td>
+    </ng-container>
 
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef class="actions-cell">Actions</th>
-        <td mat-cell *matCellDef="let hero" class="actions-cell">
-          <button
-            mat-icon-button
-            type="button"
-            matTooltip="Edit"
-            [attr.aria-label]="'Edit ' + hero.name"
-            (click)="edit.emit(hero)"
-          >
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button
-            mat-icon-button
-            type="button"
-            matTooltip="Delete"
-            [attr.aria-label]="'Delete ' + hero.name"
-            (click)="remove.emit(hero)"
-          >
-            <mat-icon>delete</mat-icon>
-          </button>
-        </td>
-      </ng-container>
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef class="actions-cell">
+        <span class="cdk-visually-hidden">Actions</span>
+      </th>
+      <td mat-cell *matCellDef="let hero" class="actions-cell">
+        <button
+          mat-icon-button
+          type="button"
+          matTooltip="Edit"
+          [attr.aria-label]="'Edit ' + hero.name"
+          (click)="edit.emit(hero)"
+        >
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          type="button"
+          class="delete-action"
+          matTooltip="Delete"
+          [attr.aria-label]="'Delete ' + hero.name"
+          (click)="remove.emit(hero)"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="columns"></tr>
-      <tr mat-row *matRowDef="let row; columns: columns"></tr>
-    </table>
-  </div>
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr
+      mat-row
+      *matRowDef="let hero; columns: columns"
+      [class.highlighted]="hero.id === highlightId()"
+    ></tr>
+  </table>
+</div>
 
-  <mat-paginator
-    [length]="heroes().length"
-    [pageIndex]="pageIndex()"
-    [pageSize]="pageSize()"
-    [pageSizeOptions]="pageSizeOptions()"
-    (page)="pageChange.emit($event)"
-    aria-label="Select page of heroes"
-  />
-} @else {
-  <p class="empty-state" data-testid="empty-state">No heroes found.</p>
-}
+<mat-paginator
+  [length]="heroes().length"
+  [pageIndex]="pageIndex()"
+  [pageSize]="pageSize()"
+  [pageSizeOptions]="pageSizeOptions()"
+  (page)="pageChange.emit($event)"
+  aria-label="Select page of heroes"
+/>

@@ -97,7 +97,10 @@ describe('HeroFormPageComponent', () => {
         },
       ]);
       expect(notifications.success).toHaveBeenCalledWith('HULK was created');
-      expect(router.navigate).toHaveBeenCalledWith(['/heroes'], { queryParams: LIST_QUERY });
+      expect(router.navigate).toHaveBeenCalledWith(['/heroes'], {
+        queryParams: LIST_QUERY,
+        state: { highlightId: 8 },
+      });
     });
 
     it('stays on the form when the name is already taken', async () => {
@@ -135,7 +138,10 @@ describe('HeroFormPageComponent', () => {
         realName: 'Dick Grayson',
       });
       expect(notifications.success).toHaveBeenCalledWith('BATMAN was updated');
-      expect(router.navigate).toHaveBeenCalledWith(['/heroes'], { queryParams: LIST_QUERY });
+      expect(router.navigate).toHaveBeenCalledWith(['/heroes'], {
+        queryParams: LIST_QUERY,
+        state: { highlightId: 4 },
+      });
     });
 
     it('returns to the list when the hero does not exist', async () => {

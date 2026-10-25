@@ -7,6 +7,7 @@ import {
   inject,
   input,
   linkedSignal,
+  viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router } from '@angular/router';
@@ -22,6 +23,7 @@ import {
   filter,
   map,
   switchMap,
+  take,
 } from 'rxjs';
 
 import { ConfirmDialogService } from '../../../../shared/ui/confirm-dialog/confirm-dialog.service';
@@ -31,7 +33,7 @@ import { HeroTableComponent } from '../../components/hero-table/hero-table.compo
 import { HeroListQueryService } from '../../data-access/hero-list-query.service';
 import { HeroService } from '../../data-access/hero.service';
 import { HeroSort, parseHeroSort, serializeHeroSort, sortHeroes } from '../../models/hero-sort';
-import { Hero } from '../../models/hero.model';
+import { Hero, HeroId } from '../../models/hero.model';
 
 export const SEARCH_DEBOUNCE_MS = new InjectionToken<number>('SEARCH_DEBOUNCE_MS', {
   providedIn: 'root',
@@ -55,6 +57,12 @@ const toPageSize = (value: string | undefined): number => {
 const lastPageIndex = (total: number, pageSize: number): number =>
   Math.max(0, Math.ceil(total / pageSize) - 1);
 
+const pluralize = (count: number): string => `${count} ${count === 1 ? 'hero' : 'heroes'}`;
+
+const isEditable = (target: EventTarget | null): boolean =>
+  target instanceof HTMLElement &&
+  (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
+
 /**
  * Container: the URL query (`q`, `page`, `size`, `sort`) is the single source of truth for the
  * list, so reloading, sharing a link or using back/forward restores the same view.
@@ -66,6 +74,7 @@ const lastPageIndex = (total: number, pageSize: number): number =>
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './hero-list-page.component.html',
   styleUrl: './hero-list-page.component.scss',
+  host: { '(document:keydown)': 'onShortcut($event)' },
 })
 export class HeroListPageComponent {
   private readonly heroService = inject(HeroService);
@@ -82,6 +91,13 @@ export class HeroListPageComponent {
   readonly sort = input(undefined, { transform: parseHeroSort });
 
   protected readonly pageSizeOptions = PAGE_SIZE_OPTIONS;
+  protected readonly skeletonRows = Array.from({ length: DEFAULT_PAGE_SIZE }, (_, index) => index);
+
+  /** Hero to flash after returning from a form, passed in the navigation state. */
+  protected readonly highlightId: HeroId | undefined =
+    this.router.currentNavigation()?.extras.state?.['highlightId'];
+
+  private readonly searchBox = viewChild.required(HeroSearchComponent);
 
   /** What the search box shows: follows the URL, but updates instantly while typing. */
   protected readonly term = linkedSignal(() => this.q() ?? '');
@@ -103,6 +119,17 @@ export class HeroListPageComponent {
     return heroes && sortHeroes(heroes, this.sort());
   });
 
+  protected readonly countLabel = computed(() => {
+    const heroes = this.sortedHeroes();
+    return heroes ? pluralize(heroes.length) : '';
+  });
+
+  /** Announced to screen readers when a search finishes. */
+  protected readonly announcement = computed(() => {
+    const heroes = this.sortedHeroes();
+    return heroes && this.q() ? `${pluralize(heroes.length)} found` : '';
+  });
+
   /** Clamped so an out-of-range `page` (or a page emptied by a delete) shows the last page. */
   protected readonly pageIndex = computed(() =>
     Math.min(this.page() - 1, lastPageIndex(this.sortedHeroes()?.length ?? 0, this.size())),
@@ -122,6 +149,22 @@ export class HeroListPageComponent {
     this.route.queryParams
       .pipe(takeUntilDestroyed())
       .subscribe((params) => listQuery.remember(params));
+
+    toObservable(this.sortedHeroes)
+      .pipe(filter(Boolean), take(1), takeUntilDestroyed())
+      .subscribe((heroes) => this.showHighlightedHero(heroes));
+  }
+
+  protected onShortcut(event: KeyboardEvent): void {
+    if (event.key === '/' && !isEditable(event.target)) {
+      event.preventDefault();
+      this.searchBox().focus();
+    }
+  }
+
+  protected onClearFilter(): void {
+    this.onTermChange('');
+    this.updateQuery({ q: null, page: null });
   }
 
   protected onTermChange(term: string): void {
@@ -167,6 +210,18 @@ export class HeroListPageComponent {
         },
         error: (error: Error) => this.notifications.error(error.message),
       });
+  }
+
+  /** Moves to the page that contains the highlighted hero, so the user sees what they saved. */
+  private showHighlightedHero(heroes: readonly Hero[]): void {
+    const index = heroes.findIndex((hero) => hero.id === this.highlightId);
+    if (index < 0) {
+      return;
+    }
+    const page = Math.floor(index / this.size()) + 1;
+    if (page !== this.pageIndex() + 1) {
+      this.updateQuery({ page: page > 1 ? page : null }, true);
+    }
   }
 
   private updateQuery(changes: Params, replaceUrl = false): void {

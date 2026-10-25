@@ -1,7 +1,7 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 }
 
 .page-header {
@@ -10,4 +10,129 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
+}
+
+.title-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.count-badge {
+  padding: 4px 12px;
+  border: 2px solid var(--app-outline);
+  border-radius: 999px;
+  background-color: var(--app-accent);
+  box-shadow: var(--app-shadow-small);
+  color: var(--app-on-accent);
+  font-weight: 700;
+  transform: rotate(-3deg);
+}
+
+.comic-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 16px;
+  text-align: center;
+}
+
+.empty-burst {
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  margin-bottom: 8px;
+  clip-path: polygon(
+    50% 0%,
+    61% 30%,
+    98% 20%,
+    72% 47%,
+    100% 70%,
+    65% 70%,
+    60% 100%,
+    45% 74%,
+    12% 92%,
+    28% 62%,
+    0% 40%,
+    35% 35%
+  );
+  background-color: var(--app-accent);
+  color: var(--app-on-accent);
+  font-family: var(--app-font-display);
+  font-size: 1.75rem;
+}
+
+.empty-title {
+  margin: 0;
+  font-family: var(--app-font-display);
+  font-size: 1.5rem;
+  letter-spacing: 0.04em;
+}
+
+.empty-text {
+  margin: 0 0 8px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.skeleton-avatar,
+.skeleton-line {
+  background: linear-gradient(
+    90deg,
+    var(--mat-sys-surface-container-high) 25%,
+    var(--mat-sys-surface-container-highest) 50%,
+    var(--mat-sys-surface-container-high) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.skeleton-avatar {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.skeleton-line {
+  flex: 2;
+  height: 14px;
+  border-radius: 7px;
+
+  &.short {
+    flex: 1;
+  }
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-avatar,
+  .skeleton-line {
+    animation: none;
+  }
 }

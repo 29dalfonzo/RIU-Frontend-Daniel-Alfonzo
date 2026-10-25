@@ -106,13 +106,21 @@ describe('HeroTableComponent', () => {
     expect(removed).toHaveBeenCalledWith(HERO_FIXTURES[1]);
   });
 
-  it('shows an empty state when there are no heroes', async () => {
-    await setInputs({ heroes: [] });
+  it('shows an avatar and a publisher badge for each hero', () => {
+    const firstRow = element().querySelector('tr[mat-row]') as HTMLElement;
 
-    expect(element().querySelector('[data-testid="empty-state"]')?.textContent).toContain(
-      'No heroes found',
+    expect(firstRow.querySelector('app-hero-avatar')?.textContent?.trim()).toBe('SP');
+    expect(firstRow.querySelector('app-publisher-badge')?.textContent?.trim()).toBe('Marvel');
+  });
+
+  it('highlights the requested hero', async () => {
+    await setInputs({ highlightId: 4 });
+
+    const highlighted = element().querySelectorAll('tr.highlighted');
+    expect(highlighted).toHaveLength(1);
+    expect(highlighted[0].querySelector('[data-testid="hero-name"]')?.textContent?.trim()).toBe(
+      'BATMAN',
     );
-    expect(renderedNames()).toEqual([]);
   });
 
   function clickAction(label: string): void {

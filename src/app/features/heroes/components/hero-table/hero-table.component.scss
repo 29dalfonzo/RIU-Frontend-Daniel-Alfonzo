@@ -11,6 +11,21 @@ table {
   white-space: nowrap;
 }
 
+// Mobile first: only the essential columns, so the actions stay on screen.
+.mat-column-id,
+.mat-column-realName,
+.mat-column-firstAppearance {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .mat-column-id,
+  .mat-column-realName,
+  .mat-column-firstAppearance {
+    display: table-cell;
+  }
+}
+
 .empty-state {
   padding: 32px 16px;
   text-align: center;

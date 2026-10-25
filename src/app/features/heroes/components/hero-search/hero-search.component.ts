@@ -9,7 +9,12 @@ import { MatInputModule } from '@angular/material/input';
   imports: [MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search">
+    <mat-form-field
+      appearance="outline"
+      floatLabel="always"
+      subscriptSizing="dynamic"
+      class="search"
+    >
       <mat-label>Filter by name</mat-label>
       <mat-icon matPrefix>search</mat-icon>
       <input

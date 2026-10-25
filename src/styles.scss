@@ -1,39 +1,56 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 
+// Material 3 theme generated with `theme-type: color-scheme`: every system color is a
+// `light-dark()` pair, so ThemeService only switches the root `color-scheme`.
 html {
   height: 100%;
+  color-scheme: light dark;
+
   @include mat.theme(
     (
       color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
+        primary: mat.$red-palette,
+        tertiary: mat.$yellow-palette,
+        theme-type: color-scheme,
       ),
-      typography: Roboto,
+      typography: (
+        plain-family: Roboto,
+        brand-family: Bangers,
+      ),
       density: 0,
     )
   );
+
+  // Comic identity tokens, layered on top of the Material system tokens.
+  --app-font-display: 'Bangers', 'Impact', sans-serif;
+  --app-ink: light-dark(#1b1b1f, #0e0e10);
+  --app-paper: light-dark(#fffaf0, #f4efe6);
+  --app-accent: #ffd23f;
+  --app-on-accent: #1b1b1f;
+  --app-outline: light-dark(#1b1b1f, #f4efe6);
+  --app-border-width: 3px;
+  --app-shadow: 5px 5px 0 var(--app-outline);
+  --app-shadow-small: 3px 3px 0 var(--app-outline);
+  --app-halftone: light-dark(rgb(27 27 31 / 7%), rgb(255 255 255 / 5%));
+  --app-publisher-marvel: #e23636;
+  --app-publisher-dc: #0476f2;
+  --app-publisher-other: #7a4dd8;
 }
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
   margin: 0;
   height: 100%;
+  background-color: var(--mat-sys-surface);
+  // Ben-Day dots, the classic comic print texture.
+  background-image: radial-gradient(var(--app-halftone) 1.2px, transparent 1.6px);
+  background-size: 14px 14px;
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
 }
-/* You can add global styles to this file, and also import other style files */
+
+// Material components keep their own styles; only global overlays are tuned here.
+.app-snackbar-error {
+  --mat-snack-bar-container-color: var(--mat-sys-error);
+  --mat-snack-bar-supporting-text-color: var(--mat-sys-on-error);
+  --mat-snack-bar-button-color: var(--mat-sys-on-error);
+}

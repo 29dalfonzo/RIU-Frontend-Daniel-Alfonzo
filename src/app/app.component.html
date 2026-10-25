@@ -1,9 +1,24 @@
 <header class="app-header">
   <mat-toolbar class="toolbar">
-    <a class="brand" routerLink="/heroes">
-      <mat-icon aria-hidden="true">shield</mat-icon>
-      <span>Super Heroes</span>
+    <a class="brand" routerLink="/heroes" aria-label="Hero Registry, go to the hero list">
+      <span class="brand-badge" aria-hidden="true">
+        <mat-icon>bolt</mat-icon>
+      </span>
+      <span class="brand-name">Hero Registry</span>
     </a>
+
+    <span class="spacer"></span>
+
+    <button
+      mat-icon-button
+      type="button"
+      data-testid="theme-toggle"
+      [attr.aria-label]="isDark() ? 'Switch to light theme' : 'Switch to dark theme'"
+      [matTooltip]="isDark() ? 'Light theme' : 'Dark theme'"
+      (click)="toggleTheme()"
+    >
+      <mat-icon>{{ isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+    </button>
   </mat-toolbar>
 
   <div class="loading-slot">

@@ -22,6 +22,7 @@ import {
   distinctUntilChanged,
   filter,
   map,
+  of,
   switchMap,
   take,
   tap,
@@ -35,6 +36,7 @@ import { HeroListQueryService } from '../../data-access/hero-list-query.service'
 import { HeroService } from '../../data-access/hero.service';
 import { HeroSort, parseHeroSort, serializeHeroSort, sortHeroes } from '../../models/hero-sort';
 import { Hero, HeroId } from '../../models/hero.model';
+import { SavedHeroNotice } from '../../models/saved-hero-notice';
 
 export const SEARCH_DEBOUNCE_MS = new InjectionToken<number>('SEARCH_DEBOUNCE_MS', {
   providedIn: 'root',
@@ -94,9 +96,10 @@ export class HeroListPageComponent {
   protected readonly pageSizeOptions = PAGE_SIZE_OPTIONS;
   protected readonly skeletonRows = Array.from({ length: DEFAULT_PAGE_SIZE }, (_, index) => index);
 
-  /** Hero to flash after returning from a form, passed in the navigation state. */
-  protected readonly highlightId: HeroId | undefined =
-    this.router.currentNavigation()?.extras.state?.['highlightId'];
+  /** Hero saved in the form we came back from, passed in the navigation state. */
+  private readonly savedHero: SavedHeroNotice | undefined =
+    this.router.currentNavigation()?.extras.state?.['savedHero'];
+  protected readonly highlightId: HeroId | undefined = this.savedHero?.id;
 
   private readonly searchBox = viewChild.required(HeroSearchComponent);
 
@@ -151,9 +154,12 @@ export class HeroListPageComponent {
       .pipe(takeUntilDestroyed())
       .subscribe((params) => listQuery.remember(params));
 
-    toObservable(this.sortedHeroes)
-      .pipe(filter(Boolean), take(1), takeUntilDestroyed())
-      .subscribe((heroes) => this.showHighlightedHero(heroes));
+    const savedHero = this.savedHero;
+    if (savedHero) {
+      toObservable(this.sortedHeroes)
+        .pipe(filter(Boolean), take(1), takeUntilDestroyed())
+        .subscribe((heroes) => this.announceSavedHero(heroes, savedHero));
+    }
   }
 
   protected onShortcut(event: KeyboardEvent): void {
@@ -218,16 +224,42 @@ export class HeroListPageComponent {
       });
   }
 
-  /** Moves to the page that contains the highlighted hero, so the user sees what they saved. */
-  private showHighlightedHero(heroes: readonly Hero[]): void {
-    const index = heroes.findIndex((hero) => hero.id === this.highlightId);
-    if (index < 0) {
+  /**
+   * Announces the hero saved in the form we came back from. If it is on screen it is just
+   * highlighted; otherwise the user stays where they were and can choose to view it.
+   */
+  private announceSavedHero(heroes: readonly Hero[], saved: SavedHeroNotice): void {
+    const index = heroes.findIndex((hero) => hero.id === saved.id);
+    if (index >= 0 && this.pageOf(index) === this.pageIndex()) {
+      this.notifications.success(saved.message);
       return;
     }
-    const page = Math.floor(index / this.size()) + 1;
-    if (page !== this.pageIndex() + 1) {
-      this.updateQuery({ page: page > 1 ? page : null }, true);
-    }
+
+    this.notifications
+      .action(saved.message, 'View')
+      .pipe(
+        // Hidden by the filter: look it up in the whole list, which the jump will show.
+        switchMap(() =>
+          index >= 0
+            ? of({ changes: {}, index })
+            : this.heroService.getAll().pipe(
+                map((all) => ({
+                  changes: { q: null },
+                  index: sortHeroes(all, this.sort()).findIndex((hero) => hero.id === saved.id),
+                })),
+              ),
+        ),
+        filter(({ index: position }) => position >= 0),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(({ changes, index: position }) => {
+        const page = this.pageOf(position) + 1;
+        this.updateQuery({ ...changes, page: page > 1 ? page : null });
+      });
+  }
+
+  private pageOf(index: number): number {
+    return Math.floor(index / this.size());
   }
 
   private updateQuery(changes: Params, replaceUrl = false): void {

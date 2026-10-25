@@ -9,6 +9,7 @@ import { NotificationService } from '../../../../shared/ui/notification/notifica
 import { HeroListQueryService } from '../../data-access/hero-list-query.service';
 import { HERO_INITIAL_STATE, HERO_LATENCY_MS, HeroService } from '../../data-access/hero.service';
 import { HERO_FIXTURES, settle } from '../../testing/hero.fixtures';
+import { SavedHeroNotice } from '../../models/saved-hero-notice';
 import { HeroListPageComponent, SEARCH_DEBOUNCE_MS } from './hero-list-page.component';
 
 @Component({ template: 'form' })
@@ -177,15 +178,52 @@ describe('HeroListPageComponent', () => {
       expect(renderedNames()).toHaveLength(5);
     });
 
-    it('highlights the hero the user just saved, on its page', async () => {
-      // Coming back from a form, as HeroFormPageComponent does after saving.
-      await open('/heroes/new');
-      await router.navigate(['/heroes'], { state: { highlightId: 7 } });
-      await settle(harness.fixture);
+    describe('after saving a hero', () => {
+      const highlightedName = (): string | undefined =>
+        element().querySelector('tr.highlighted [data-testid="hero-name"]')?.textContent?.trim();
 
-      expect(router.url).toBe('/heroes?page=2');
-      const highlighted = element().querySelector('tr.highlighted [data-testid="hero-name"]');
-      expect(highlighted?.textContent?.trim()).toBe('THOR');
+      // Coming back from a form, as HeroFormPageComponent does after saving.
+      const returnFromForm = async (url: string, savedHero: SavedHeroNotice): Promise<void> => {
+        await open('/heroes/new');
+        await router.navigateByUrl(url, { state: { savedHero } });
+        await settle(harness.fixture);
+      };
+
+      it('highlights it in place when it is on the current page', async () => {
+        await returnFromForm('/heroes', { id: 4, message: 'BATMAN was updated' });
+
+        expect(router.url).toBe('/heroes');
+        expect(highlightedName()).toBe('BATMAN');
+        expect(notifications.success).toHaveBeenCalledWith('BATMAN was updated');
+        expect(notifications.action).not.toHaveBeenCalled();
+      });
+
+      it('stays on the current page and offers to view it when it is elsewhere', async () => {
+        await returnFromForm('/heroes', { id: 7, message: 'THOR was created' });
+
+        expect(router.url).toBe('/heroes');
+        expect(notifications.action).toHaveBeenCalledWith('THOR was created', 'View');
+      });
+
+      it('jumps to its page when the user clicks View', async () => {
+        notifications.action.mockReturnValue(of(undefined));
+
+        await returnFromForm('/heroes', { id: 7, message: 'THOR was created' });
+
+        expect(router.url).toBe('/heroes?page=2');
+        expect(highlightedName()).toBe('THOR');
+      });
+
+      it('clears a filter that hides it when the user clicks View', async () => {
+        notifications.action.mockReturnValue(of(undefined));
+
+        await returnFromForm('/heroes?q=bat', { id: 7, message: 'THOR was created' });
+        // Looking it up in the whole list, then reloading without the filter, takes extra ticks.
+        await settle(harness.fixture);
+
+        expect(router.url).toBe('/heroes?page=2');
+        expect(highlightedName()).toBe('THOR');
+      });
     });
 
     it('focuses the search box when the user presses "/"', async () => {

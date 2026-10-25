@@ -96,10 +96,11 @@ describe('HeroFormPageComponent', () => {
           firstAppearance: 1962,
         },
       ]);
-      expect(notifications.success).toHaveBeenCalledWith('HULK was created');
+      // The list announces the result: it knows whether the hero is on screen.
+      expect(notifications.success).not.toHaveBeenCalled();
       expect(router.navigate).toHaveBeenCalledWith(['/heroes'], {
         queryParams: LIST_QUERY,
-        state: { highlightId: 8 },
+        state: { savedHero: { id: 8, message: 'HULK was created' } },
       });
     });
 
@@ -163,10 +164,10 @@ describe('HeroFormPageComponent', () => {
         ...HERO_FIXTURES[3],
         realName: 'Dick Grayson',
       });
-      expect(notifications.success).toHaveBeenCalledWith('BATMAN was updated');
+      expect(notifications.success).not.toHaveBeenCalled();
       expect(router.navigate).toHaveBeenCalledWith(['/heroes'], {
         queryParams: LIST_QUERY,
-        state: { highlightId: 4 },
+        state: { savedHero: { id: 4, message: 'BATMAN was updated' } },
       });
     });
 

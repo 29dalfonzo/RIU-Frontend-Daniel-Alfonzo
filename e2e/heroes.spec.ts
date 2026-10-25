@@ -68,9 +68,13 @@ test.describe('Super heroes maintenance', () => {
     });
     await heroes.save();
 
-    // The new hero is the 13th: the list jumps to its page and highlights it.
-    await expect(page).toHaveURL(/\/heroes\?page=3$/);
+    // The new hero is the 13th: the user stays on page 1 and can choose to view it.
+    await expect(page).toHaveURL(/\/heroes$/);
     await expect(heroes.snackbar).toContainText('SHE-HULK was created');
+
+    await heroes.snackbar.getByRole('button', { name: 'View' }).click();
+
+    await expect(page).toHaveURL(/\/heroes\?page=3$/);
     await expect(page.locator('tr.highlighted')).toContainText('SHE-HULK');
   });
 

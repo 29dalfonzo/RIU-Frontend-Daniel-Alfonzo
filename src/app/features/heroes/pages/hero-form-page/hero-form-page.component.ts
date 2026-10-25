@@ -17,6 +17,7 @@ import { HeroFormComponent } from '../../components/hero-form/hero-form.componen
 import { HeroListQueryService } from '../../data-access/hero-list-query.service';
 import { HeroService } from '../../data-access/hero.service';
 import { Hero, HeroDraft, HeroId } from '../../models/hero.model';
+import { SavedHeroNotice } from '../../models/saved-hero-notice';
 import { HasUnsavedChanges } from './unsaved-changes.guard';
 
 const toHeroId = (value: string | undefined): HeroId | undefined =>
@@ -78,20 +79,19 @@ export class HeroFormPageComponent implements HasUnsavedChanges {
       )
       .subscribe({
         next: (hero) => {
-          this.notifications.success(`${hero.name} was ${action}`);
           this.unsaved.set(false);
-          this.backToList(hero.id);
+          this.backToList({ id: hero.id, message: `${hero.name} was ${action}` });
         },
         error: (error: Error) => this.notifications.error(error.message),
       });
   }
 
-  /** Returns to the list view the user came from; a saved hero is passed along to be highlighted. */
-  protected backToList(highlightId?: HeroId): void {
+  /** Returns to the list view the user came from; the list announces a saved hero. */
+  protected backToList(savedHero?: SavedHeroNotice): void {
     const queryParams = this.listQuery.lastQuery();
     void this.router.navigate(
       ['/heroes'],
-      highlightId === undefined ? { queryParams } : { queryParams, state: { highlightId } },
+      savedHero ? { queryParams, state: { savedHero } } : { queryParams },
     );
   }
 

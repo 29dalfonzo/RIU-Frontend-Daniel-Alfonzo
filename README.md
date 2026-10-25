@@ -109,7 +109,7 @@ The interface uses a **comic theme built on Angular Material 3**: the Material t
 | Theme | Light and dark themes (`theme-type: color-scheme`), toggle in the header; follows the OS by default and remembers the choice |
 | URL state | Filter, page, page size and sort live in the query string (`?q=man&page=2&sort=name:asc`): reload, shared links and back/forward restore the same view, and forms return to it |
 | List | Sortable columns, initials avatars, publisher badges (white text ≥ 4.98:1 contrast), first-load skeleton, empty state with *Clear filter* / *Add hero*, `aria-live` result count, `/` focuses the search |
-| Saving | The created or edited hero is highlighted and the list jumps to its page |
+| Saving | Back on the list, the saved hero is highlighted if it is on screen; otherwise the user stays where they were and the snackbar offers *View*, which jumps to its page (clearing a filter that hides it) |
 | Delete | Confirmation dialog with the hero name and a danger action (focus starts on *Cancel*), then *Undo* in the snackbar |
 | Form | Breadcrumb, hints and name counter, live trading-card preview, focus on the first invalid field, *Save* disabled until an edit changes something, and a guard that asks before discarding unsaved changes |
 | Mobile | Mobile-first layouts: the table keeps only name (with publisher) and actions, the preview becomes a compact card |
@@ -177,7 +177,7 @@ Errors appear once a field is touched or the form is submitted. The form is full
 
 ### End-to-end
 
-`npm run e2e` runs [Playwright](https://playwright.dev) against a real dev server, on desktop and mobile (Pixel 7) Chrome. The suite covers pagination, filtering and clearing the filter, restoring state from a shared link, creating with validations and upper case (with the new hero highlighted), rejecting a duplicate name, editing, confirming, cancelling and undoing a deletion, the unsaved-changes guard, the theme toggle, the loading bar, and redirecting an unknown hero id. The first run needs the browser: `npx playwright install chromium`.
+`npm run e2e` runs [Playwright](https://playwright.dev) against a real dev server, on desktop and mobile (Pixel 7) Chrome. The suite covers pagination, filtering and clearing the filter, restoring state from a shared link, creating with validations and upper case (then *View* to jump to the new hero), rejecting a duplicate name, editing, confirming, cancelling and undoing a deletion, the unsaved-changes guard, the theme toggle, the loading bar, and redirecting an unknown hero id. The first run needs the browser: `npx playwright install chromium`.
 
 ## Commit convention
 

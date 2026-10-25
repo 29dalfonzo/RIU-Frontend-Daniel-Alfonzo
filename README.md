@@ -83,21 +83,37 @@ docker build --target test .
 ```text
 src/app
 ├── core/                    # App-wide singletons
-│   └── loading/             # LoadingService + HTTP loading interceptor
+│   ├── loading/             # LoadingService + HTTP loading interceptor
+│   └── theme/               # ThemeService (light/dark)
 ├── shared/                  # Reusable, feature-agnostic building blocks
 │   ├── directives/          # UppercaseDirective
 │   └── ui/                  # Confirm dialog, notifications (snackbar)
 └── features/
     └── heroes/              # Feature folder, lazy loaded
-        ├── models/          # Hero, HeroDraft, Publisher, domain errors
-        ├── data-access/     # HeroService (in-memory store) + seed data
-        ├── components/      # Presentational: table, search, form
-        ├── pages/           # Containers: list page, form page
+        ├── models/          # Hero, HeroDraft, Publisher, sorting, domain errors
+        ├── data-access/     # HeroService (in-memory store), seed data, list query memory
+        ├── components/      # Presentational: table, search, form, preview, avatar, badge
+        ├── pages/           # Containers: list page, form page (+ unsaved-changes guard)
         ├── testing/         # Shared fixtures for specs
         └── heroes.routes.ts
 ```
 
 Each folder describes *what* it holds, so the feature is readable without opening files. Containers (`pages/`) own state and side effects. Presentational components (`components/`) only receive inputs and emit events.
+
+## UI and UX
+
+The interface uses a **comic theme built on Angular Material 3**: the Material theme is generated with a red primary, yellow tertiary and the *Bangers* display font, and a small set of CSS tokens (`--app-ink`, `--app-outline`, `--app-shadow`…) adds ink outlines, offset shadows and a halftone background. Components keep using Material; only tokens and a few layout classes are custom.
+
+| Area | What it does |
+| --- | --- |
+| Theme | Light and dark themes (`theme-type: color-scheme`), toggle in the header; follows the OS by default and remembers the choice |
+| URL state | Filter, page, page size and sort live in the query string (`?q=man&page=2&sort=name:asc`): reload, shared links and back/forward restore the same view, and forms return to it |
+| List | Sortable columns, initials avatars, publisher badges (white text ≥ 4.98:1 contrast), first-load skeleton, empty state with *Clear filter* / *Add hero*, `aria-live` result count, `/` focuses the search |
+| Saving | The created or edited hero is highlighted and the list jumps to its page |
+| Delete | Confirmation dialog with the hero name and a danger action (focus starts on *Cancel*), then *Undo* in the snackbar |
+| Form | Breadcrumb, hints and name counter, live trading-card preview, focus on the first invalid field, *Save* disabled until an edit changes something, and a guard that asks before discarding unsaved changes |
+| Mobile | Mobile-first layouts: the table keeps only name (with publisher) and actions, the preview becomes a compact card |
+| Motion | Highlight, skeleton and card animations are disabled with `prefers-reduced-motion` |
 
 ## Design decisions
 
@@ -157,11 +173,11 @@ Errors appear once a field is touched or the form is submitted. The form is full
 - **Vitest** through the Angular `unit-test` builder, with jsdom.
 - Tests go through the public surface: the DOM, Angular Material **component harnesses** (paginator, select, dialog, button) and `RouterTestingHarness` for routing.
 - Material animations are disabled globally in tests (`src/test-providers.ts`), so dialogs close synchronously.
-- `npm run test:coverage` enforces a minimum of **80%** coverage; the current suite is at ~98% statements and branches.
+- `npm run test:coverage` enforces a minimum of **80%** coverage; the current suite is at ~99% statements and ~97% branches.
 
 ### End-to-end
 
-`npm run e2e` runs [Playwright](https://playwright.dev) against a real dev server, on desktop and mobile (Pixel 7) Chrome. The suite covers pagination, filtering, creating with validations and upper case, rejecting a duplicate name, editing, confirming or cancelling a deletion, the loading bar, and redirecting an unknown hero id. The first run needs the browser: `npx playwright install chromium`.
+`npm run e2e` runs [Playwright](https://playwright.dev) against a real dev server, on desktop and mobile (Pixel 7) Chrome. The suite covers pagination, filtering and clearing the filter, restoring state from a shared link, creating with validations and upper case (with the new hero highlighted), rejecting a duplicate name, editing, confirming, cancelling and undoing a deletion, the unsaved-changes guard, the theme toggle, the loading bar, and redirecting an unknown hero id. The first run needs the browser: `npx playwright install chromium`.
 
 ## Commit convention
 

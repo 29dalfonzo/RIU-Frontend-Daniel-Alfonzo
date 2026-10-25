@@ -130,6 +130,34 @@ test.describe('Super heroes maintenance', () => {
     await expect(page.getByTestId('loading')).toBeHidden();
   });
 
+  test('asks before leaving a form with unsaved changes', async ({ page }) => {
+    await heroes.rowAction('Edit', 'BATMAN').click();
+    await page.getByLabel('Real name').fill('Dick Grayson');
+    await expect(page.getByText('Dick Grayson')).toBeVisible();
+
+    await page.getByRole('link', { name: 'Heroes' }).click();
+    await expect(heroes.dialog).toContainText('Discard changes?');
+    await heroes.dialog.getByRole('button', { name: 'Cancel' }).click();
+    await expect(page).toHaveURL(/\/heroes\/4\/edit$/);
+
+    await page.getByRole('link', { name: 'Heroes' }).click();
+    await heroes.dialog.getByRole('button', { name: 'Discard' }).click();
+    await expect(page).toHaveURL(/\/heroes$/);
+  });
+
+  test('switches and remembers the color theme', async ({ page }) => {
+    const colorScheme = () => page.evaluate(() => document.documentElement.style.colorScheme);
+    const initial = await colorScheme();
+
+    await page.getByRole('button', { name: /Switch to (dark|light) theme/ }).click();
+    await expect.poll(colorScheme).not.toBe(initial);
+    const scheme = await colorScheme();
+
+    await page.reload();
+
+    await expect.poll(colorScheme).toBe(scheme);
+  });
+
   test('redirects an unknown hero back to the list', async ({ page }) => {
     await page.goto('/heroes/999/edit');
 

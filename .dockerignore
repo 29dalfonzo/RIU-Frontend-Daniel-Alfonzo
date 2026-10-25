@@ -1,0 +1,12 @@
+.angular
+.git
+.vscode
+coverage
+dist
+node_modules
+odd
+npm-debug.log
+Dockerfile
+docker-compose.yml
+test-results
+playwright-report

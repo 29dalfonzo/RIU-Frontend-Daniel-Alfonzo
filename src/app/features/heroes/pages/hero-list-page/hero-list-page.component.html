@@ -1,0 +1,15 @@
+<section class="page">
+  <header class="page-header">
+    <h1>Super heroes</h1>
+    <button mat-flat-button type="button" data-testid="add-hero" (click)="onAdd()">
+      <mat-icon>add</mat-icon>
+      Add hero
+    </button>
+  </header>
+
+  <app-hero-search [(term)]="term" />
+
+  @if (heroes(); as heroes) {
+    <app-hero-table [heroes]="heroes" (edit)="onEdit($event)" (remove)="onRemove($event)" />
+  }
+</section>

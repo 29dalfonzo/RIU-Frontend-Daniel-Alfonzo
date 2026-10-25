@@ -1,0 +1,9 @@
+services:
+  web:
+    build:
+      context: .
+      target: runtime
+    image: riu-frontend-daniel-alfonzo:latest
+    ports:
+      - '8080:80'
+    restart: unless-stopped

@@ -24,13 +24,13 @@ export interface ConfirmDialogData {
       }
       {{ data.title }}
     </h2>
-    <mat-dialog-content>
+    <mat-dialog-content class="content">
       @if (data.subject) {
         <p class="subject">{{ data.subject }}</p>
       }
       <p class="message">{{ data.message }}</p>
     </mat-dialog-content>
-    <mat-dialog-actions align="end">
+    <mat-dialog-actions align="end" class="actions">
       <button mat-button type="button" [mat-dialog-close]="false" cdkFocusInitial>Cancel</button>
       <button mat-flat-button type="button" [class.danger]="data.danger" [mat-dialog-close]="true">
         {{ data.confirmLabel ?? 'Confirm' }}
@@ -48,10 +48,19 @@ export interface ConfirmDialogData {
       color: var(--mat-sys-error);
     }
 
+    .content {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      // Room for the display font ascenders, which the scrollable content would clip.
+      padding-top: 8px;
+    }
+
     .subject {
-      margin: 0 0 8px;
+      margin: 0;
       font-family: var(--app-font-display);
       font-size: 2rem;
+      line-height: 1.25;
       letter-spacing: 0.04em;
       color: var(--mat-sys-on-surface);
       text-shadow: 2px 2px 0 var(--app-accent);
@@ -59,6 +68,11 @@ export interface ConfirmDialogData {
 
     .message {
       margin: 0;
+      line-height: 1.5;
+    }
+
+    .actions {
+      padding-top: 16px;
     }
 
     .danger {

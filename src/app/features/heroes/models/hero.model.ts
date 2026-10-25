@@ -15,6 +15,14 @@ export interface Hero {
 /** Payload used to register a hero: the store owns identity generation. */
 export type HeroDraft = Omit<Hero, 'id'>;
 
+/** A draft while it is being edited: the choice fields may still be empty. */
+export interface EditableHeroDraft {
+  readonly name: string;
+  readonly realName: string;
+  readonly publisher: Publisher | null;
+  readonly firstAppearance: number | null;
+}
+
 export class HeroNotFoundError extends Error {
   constructor(readonly heroId: HeroId) {
     super(`Hero with id ${heroId} was not found`);

@@ -5,9 +5,13 @@ import { Router, provideRouter } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { NotificationService } from '../../../../shared/ui/notification/notification.service';
+import { HeroListQueryService } from '../../data-access/hero-list-query.service';
 import { HERO_INITIAL_STATE, HERO_LATENCY_MS, HeroService } from '../../data-access/hero.service';
 import { HERO_FIXTURES, settle } from '../../testing/hero.fixtures';
 import { HeroFormPageComponent } from './hero-form-page.component';
+
+/** The list view the user came from: forms must return to it, not to a reset list. */
+const LIST_QUERY = { q: 'man', page: '2' };
 
 describe('HeroFormPageComponent', () => {
   let fixture: ComponentFixture<HeroFormPageComponent>;
@@ -62,6 +66,7 @@ describe('HeroFormPageComponent', () => {
     router = TestBed.inject(Router);
     heroService = TestBed.inject(HeroService);
     vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    TestBed.inject(HeroListQueryService).remember(LIST_QUERY);
   });
 
   describe('create mode', () => {
@@ -91,8 +96,12 @@ describe('HeroFormPageComponent', () => {
           firstAppearance: 1962,
         },
       ]);
-      expect(notifications.success).toHaveBeenCalledWith('HULK was created');
-      expect(router.navigate).toHaveBeenCalledWith(['/heroes']);
+      // The list announces the result: it knows whether the hero is on screen.
+      expect(notifications.success).not.toHaveBeenCalled();
+      expect(router.navigate).toHaveBeenCalledWith(['/heroes'], {
+        queryParams: LIST_QUERY,
+        state: { savedHero: { id: 8, message: 'HULK was created' } },
+      });
     });
 
     it('stays on the form when the name is already taken', async () => {
@@ -111,7 +120,33 @@ describe('HeroFormPageComponent', () => {
     it('returns to the list on cancel', () => {
       element().querySelector<HTMLButtonElement>('[data-testid="cancel"]')?.click();
 
-      expect(router.navigate).toHaveBeenCalledWith(['/heroes']);
+      expect(router.navigate).toHaveBeenCalledWith(['/heroes'], { queryParams: LIST_QUERY });
+    });
+  });
+
+  describe('navigation safety', () => {
+    it('shows a breadcrumb back to the list view the user came from', async () => {
+      await render('4');
+
+      const crumb = element().querySelector<HTMLAnchorElement>('nav[aria-label="Breadcrumb"] a');
+      expect(crumb?.textContent?.trim()).toBe('Heroes');
+      expect(crumb?.getAttribute('href')).toBe('/heroes?q=man&page=2');
+      expect(element().querySelector('[aria-current="page"]')?.textContent?.trim()).toBe(
+        'Edit BATMAN',
+      );
+    });
+
+    it('reports unsaved changes only while the form differs from the saved hero', async () => {
+      await render('4');
+      const page = fixture.componentInstance;
+      expect(page.hasUnsavedChanges()).toBe(false);
+
+      type('realName', 'Dick Grayson');
+      await settle(fixture);
+      expect(page.hasUnsavedChanges()).toBe(true);
+
+      await submit();
+      expect(page.hasUnsavedChanges()).toBe(false);
     });
   });
 
@@ -129,15 +164,18 @@ describe('HeroFormPageComponent', () => {
         ...HERO_FIXTURES[3],
         realName: 'Dick Grayson',
       });
-      expect(notifications.success).toHaveBeenCalledWith('BATMAN was updated');
-      expect(router.navigate).toHaveBeenCalledWith(['/heroes']);
+      expect(notifications.success).not.toHaveBeenCalled();
+      expect(router.navigate).toHaveBeenCalledWith(['/heroes'], {
+        queryParams: LIST_QUERY,
+        state: { savedHero: { id: 4, message: 'BATMAN was updated' } },
+      });
     });
 
     it('returns to the list when the hero does not exist', async () => {
       await render('99');
 
       expect(notifications.error).toHaveBeenCalledWith('Hero with id 99 was not found');
-      expect(router.navigate).toHaveBeenCalledWith(['/heroes']);
+      expect(router.navigate).toHaveBeenCalledWith(['/heroes'], { queryParams: LIST_QUERY });
       expect(element().querySelector('form')).toBeNull();
     });
   });

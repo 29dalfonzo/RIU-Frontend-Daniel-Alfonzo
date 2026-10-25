@@ -1,3 +1,12 @@
+:host {
+  display: block;
+  --mat-table-background-color: transparent;
+  --mat-paginator-container-background-color: transparent;
+  --mat-table-header-headline-font: var(--app-font-display);
+  --mat-table-header-headline-size: 1.05rem;
+  --mat-table-header-headline-tracking: 0.06em;
+}
+
 .table-container {
   overflow-x: auto;
 }
@@ -6,28 +15,95 @@ table {
   width: 100%;
 }
 
+.hero-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-name {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+// On mobile the publisher column is hidden, so the publisher is shown under the name.
+.publisher-caption {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.75rem;
+}
+
+.muted {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+tr.mat-mdc-row {
+  transition: background-color 150ms ease;
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--app-accent) 18%, transparent);
+  }
+}
+
+// "POW!" flash for the hero that was just created or edited.
+tr.highlighted {
+  animation: highlight-flash 2.4s ease-out;
+  background-color: color-mix(in srgb, var(--app-accent) 30%, transparent);
+}
+
+@keyframes highlight-flash {
+  0%,
+  30% {
+    background-color: var(--app-accent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  tr.highlighted {
+    animation: none;
+  }
+}
+
 .actions-cell {
   text-align: end;
   white-space: nowrap;
 }
 
-// Mobile first: only the essential columns, so the actions stay on screen.
+.delete-action:hover {
+  color: var(--mat-sys-error);
+}
+
+// Mobile first: only the name and the actions, so every button stays on screen.
 .mat-column-id,
 .mat-column-realName,
+.mat-column-publisher,
 .mat-column-firstAppearance {
   display: none;
+}
+
+.mat-mdc-cell,
+.mat-mdc-header-cell {
+  padding-inline: 8px;
 }
 
 @media (min-width: 768px) {
   .mat-column-id,
   .mat-column-realName,
+  .mat-column-publisher,
   .mat-column-firstAppearance {
     display: table-cell;
   }
-}
 
-.empty-state {
-  padding: 32px 16px;
-  text-align: center;
-  color: var(--mat-sys-on-surface-variant);
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    padding-inline: 16px;
+  }
+
+  .publisher-caption {
+    display: none;
+  }
 }

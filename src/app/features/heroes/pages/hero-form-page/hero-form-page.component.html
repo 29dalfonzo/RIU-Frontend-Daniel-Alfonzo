@@ -1,14 +1,18 @@
 <section class="page">
-  @if (!isEdit()) {
-    <h1>New hero</h1>
-    <app-hero-form [busy]="saving()" (save)="onSave($event)" (cancelled)="backToList()" />
-  } @else if (hero(); as hero) {
-    <h1>Edit {{ hero.name }}</h1>
+  <nav aria-label="Breadcrumb" class="breadcrumb">
+    <a routerLink="/heroes" [queryParams]="listQueryParams()">Heroes</a>
+    <mat-icon aria-hidden="true">chevron_right</mat-icon>
+    <span aria-current="page">{{ title() }}</span>
+  </nav>
+
+  @if (!isEdit() || hero()) {
+    <h1 class="page-title">{{ title() }}</h1>
     <app-hero-form
-      [hero]="hero"
+      [hero]="hero()"
       [busy]="saving()"
       (save)="onSave($event)"
       (cancelled)="backToList()"
+      (changed)="onChanged($event)"
     />
   }
 </section>

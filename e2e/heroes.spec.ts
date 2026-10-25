@@ -34,7 +34,21 @@ test.describe('Super heroes maintenance', () => {
     await heroes.filter('xyz');
 
     await expect(heroes.heroNames).toHaveCount(0);
-    await expect(page.getByText('No heroes found.')).toBeVisible();
+    await expect(page.getByText('No heroes match "xyz"')).toBeVisible();
+    await expect(page).toHaveURL(/\/heroes\?q=xyz$/);
+
+    await page.getByRole('button', { name: 'Clear filter' }).click();
+
+    await expect(heroes.heroNames).toHaveCount(5);
+    await expect(page).toHaveURL(/\/heroes$/);
+  });
+
+  test('restores filter, sort and page from a shared link', async ({ page }) => {
+    await page.goto('/heroes?q=man&sort=name:asc&page=2');
+
+    await expect(heroes.search).toHaveValue('man');
+    // Seed matches for "man" sorted by name: AQUAMAN … SPIDERMAN | SUPERMAN, WONDER WOMAN.
+    await expect(heroes.heroNames).toHaveText(['SUPERMAN', 'WONDER WOMAN']);
   });
 
   test('creates a hero with validation and the name in upper case', async ({ page }) => {
@@ -54,10 +68,14 @@ test.describe('Super heroes maintenance', () => {
     });
     await heroes.save();
 
+    // The new hero is the 13th: the user stays on page 1 and can choose to view it.
     await expect(page).toHaveURL(/\/heroes$/);
     await expect(heroes.snackbar).toContainText('SHE-HULK was created');
-    await heroes.filter('she');
-    await expect(heroes.heroNames).toHaveText(['SHE-HULK']);
+
+    await heroes.snackbar.getByRole('button', { name: 'View' }).click();
+
+    await expect(page).toHaveURL(/\/heroes\?page=3$/);
+    await expect(page.locator('tr.highlighted')).toContainText('SHE-HULK');
   });
 
   test('rejects a duplicated hero name', async ({ page }) => {
@@ -85,7 +103,8 @@ test.describe('Super heroes maintenance', () => {
 
   test('deletes a hero only after confirmation', async () => {
     await heroes.rowAction('Delete', 'SUPERMAN').click();
-    await expect(heroes.dialog).toContainText('Are you sure you want to delete SUPERMAN?');
+    await expect(heroes.dialog).toContainText('Delete hero');
+    await expect(heroes.dialog).toContainText('SUPERMAN');
     await heroes.dialog.getByRole('button', { name: 'Cancel' }).click();
     await expect(heroes.heroNames).toContainText(['SUPERMAN']);
 
@@ -96,12 +115,51 @@ test.describe('Super heroes maintenance', () => {
     await expect(heroes.heroNames).not.toContainText(['SUPERMAN']);
   });
 
+  test('undoes a deletion from the snackbar', async () => {
+    await heroes.rowAction('Delete', 'BATMAN').click();
+    await heroes.dialog.getByRole('button', { name: 'Delete' }).click();
+    await expect(heroes.heroNames).not.toContainText(['BATMAN']);
+
+    await heroes.snackbar.getByRole('button', { name: 'Undo' }).click();
+
+    await expect(heroes.snackbar).toContainText('BATMAN was restored');
+    await expect(heroes.heroNames).toContainText(['BATMAN']);
+  });
+
   test('shows the loading bar while an operation runs', async ({ page }) => {
     await heroes.rowAction('Delete', 'SPIDERMAN').click();
     await heroes.dialog.getByRole('button', { name: 'Delete' }).click();
 
     await expect(page.getByTestId('loading')).toBeVisible();
     await expect(page.getByTestId('loading')).toBeHidden();
+  });
+
+  test('asks before leaving a form with unsaved changes', async ({ page }) => {
+    await heroes.rowAction('Edit', 'BATMAN').click();
+    await page.getByLabel('Real name').fill('Dick Grayson');
+    await expect(page.getByText('Dick Grayson')).toBeVisible();
+
+    await page.getByRole('link', { name: 'Heroes' }).click();
+    await expect(heroes.dialog).toContainText('Discard changes?');
+    await heroes.dialog.getByRole('button', { name: 'Cancel' }).click();
+    await expect(page).toHaveURL(/\/heroes\/4\/edit$/);
+
+    await page.getByRole('link', { name: 'Heroes' }).click();
+    await heroes.dialog.getByRole('button', { name: 'Discard' }).click();
+    await expect(page).toHaveURL(/\/heroes$/);
+  });
+
+  test('switches and remembers the color theme', async ({ page }) => {
+    const colorScheme = () => page.evaluate(() => document.documentElement.style.colorScheme);
+    const initial = await colorScheme();
+
+    await page.getByRole('button', { name: /Switch to (dark|light) theme/ }).click();
+    await expect.poll(colorScheme).not.toBe(initial);
+    const scheme = await colorScheme();
+
+    await page.reload();
+
+    await expect.poll(colorScheme).toBe(scheme);
   });
 
   test('redirects an unknown hero back to the list', async ({ page }) => {

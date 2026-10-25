@@ -1,0 +1,44 @@
+// Colors come from the panel class set by NotificationService (see `.comic-snackbar-*` in styles.scss).
+:host {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 4px 4px 4px 12px;
+  color: var(--app-notification-text);
+}
+
+.icon-badge {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--app-notification-text);
+  border-radius: 50%;
+  background-color: var(--app-notification-badge);
+  color: var(--app-notification-badge-text);
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+}
+
+.message {
+  flex: 1;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.action {
+  --mat-button-text-label-text-color: var(--app-notification-action);
+  font-family: var(--app-font-display);
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+}
+
+.dismiss {
+  color: var(--app-notification-text);
+}

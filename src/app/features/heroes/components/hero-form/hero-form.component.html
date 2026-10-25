@@ -1,70 +1,88 @@
-<form class="hero-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
-  <mat-form-field appearance="outline">
-    <mat-label>Name</mat-label>
-    <input
-      matInput
-      formControlName="name"
-      appUppercase
-      autocomplete="off"
-      [maxlength]="limits.nameMax"
-    />
-    @if (form.controls.name.hasError('required')) {
-      <mat-error>Name is required</mat-error>
-    } @else if (form.controls.name.hasError('minlength')) {
-      <mat-error>Name must have at least {{ limits.nameMin }} characters</mat-error>
-    } @else if (form.controls.name.hasError('maxlength')) {
-      <mat-error>Name must have at most {{ limits.nameMax }} characters</mat-error>
-    }
-  </mat-form-field>
-
-  <mat-form-field appearance="outline">
-    <mat-label>Real name</mat-label>
-    <input
-      matInput
-      formControlName="realName"
-      autocomplete="off"
-      [maxlength]="limits.realNameMax"
-    />
-    @if (form.controls.realName.hasError('required')) {
-      <mat-error>Real name is required</mat-error>
-    } @else if (form.controls.realName.hasError('maxlength')) {
-      <mat-error>Real name must have at most {{ limits.realNameMax }} characters</mat-error>
-    }
-  </mat-form-field>
-
-  <mat-form-field appearance="outline">
-    <mat-label>Publisher</mat-label>
-    <mat-select formControlName="publisher">
-      @for (publisher of publishers; track publisher) {
-        <mat-option [value]="publisher">{{ publisher }}</mat-option>
+<div class="layout">
+  <form class="hero-form comic-panel" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <mat-form-field appearance="outline">
+      <mat-label>Name</mat-label>
+      <input
+        matInput
+        formControlName="name"
+        appUppercase
+        autocomplete="off"
+        [maxlength]="limits.nameMax"
+      />
+      <mat-hint>Shown in upper case and unique</mat-hint>
+      <mat-hint align="end">{{ draft().name.length }}/{{ limits.nameMax }}</mat-hint>
+      @if (form.controls.name.hasError('required')) {
+        <mat-error>Name is required</mat-error>
+      } @else if (form.controls.name.hasError('minlength')) {
+        <mat-error>Name must have at least {{ limits.nameMin }} characters</mat-error>
+      } @else if (form.controls.name.hasError('maxlength')) {
+        <mat-error>Name must have at most {{ limits.nameMax }} characters</mat-error>
       }
-    </mat-select>
-    @if (form.controls.publisher.hasError('required')) {
-      <mat-error>Publisher is required</mat-error>
-    }
-  </mat-form-field>
+    </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>First appearance</mat-label>
-    <input
-      matInput
-      type="number"
-      formControlName="firstAppearance"
-      [min]="limits.firstYear"
-      [max]="limits.lastYear"
-      step="1"
-    />
-    @if (form.controls.firstAppearance.hasError('required')) {
-      <mat-error>First appearance is required</mat-error>
-    } @else if (
-      form.controls.firstAppearance.hasError('min') || form.controls.firstAppearance.hasError('max')
-    ) {
-      <mat-error>Year must be between {{ limits.firstYear }} and {{ limits.lastYear }}</mat-error>
-    }
-  </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Real name</mat-label>
+      <input
+        matInput
+        formControlName="realName"
+        autocomplete="off"
+        [maxlength]="limits.realNameMax"
+      />
+      <mat-hint>Secret identity</mat-hint>
+      @if (form.controls.realName.hasError('required')) {
+        <mat-error>Real name is required</mat-error>
+      } @else if (form.controls.realName.hasError('maxlength')) {
+        <mat-error>Real name must have at most {{ limits.realNameMax }} characters</mat-error>
+      }
+    </mat-form-field>
 
-  <div class="actions">
-    <button mat-button type="button" data-testid="cancel" (click)="cancelled.emit()">Cancel</button>
-    <button mat-flat-button type="submit" [disabled]="busy()">Save</button>
-  </div>
-</form>
+    <div class="row">
+      <mat-form-field appearance="outline">
+        <mat-label>Publisher</mat-label>
+        <mat-select formControlName="publisher">
+          @for (publisher of publishers; track publisher) {
+            <mat-option [value]="publisher">{{ publisher }}</mat-option>
+          }
+        </mat-select>
+        @if (form.controls.publisher.hasError('required')) {
+          <mat-error>Publisher is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>First appearance</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="firstAppearance"
+          [min]="limits.firstYear"
+          [max]="limits.lastYear"
+          step="1"
+        />
+        <mat-hint>Year of the first comic</mat-hint>
+        @if (form.controls.firstAppearance.hasError('required')) {
+          <mat-error>First appearance is required</mat-error>
+        } @else if (
+          form.controls.firstAppearance.hasError('min') ||
+          form.controls.firstAppearance.hasError('max')
+        ) {
+          <mat-error
+            >Year must be between {{ limits.firstYear }} and {{ limits.lastYear }}</mat-error
+          >
+        }
+      </mat-form-field>
+    </div>
+
+    <div class="actions">
+      <button mat-button type="button" data-testid="cancel" (click)="cancelled.emit()">
+        Cancel
+      </button>
+      <button mat-flat-button type="submit" [disabled]="saveDisabled()">
+        <mat-icon>save</mat-icon>
+        Save
+      </button>
+    </div>
+  </form>
+
+  <app-hero-preview class="preview" [hero]="draft()" />
+</div>

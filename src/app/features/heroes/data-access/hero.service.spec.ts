@@ -185,6 +185,39 @@ describe('HeroService', () => {
     });
   });
 
+  describe('restore', () => {
+    it('puts a deleted hero back with the same id and position', async () => {
+      await firstValueFrom(service.delete(2));
+
+      const restored = await firstValueFrom(service.restore(SEED[1]));
+
+      expect(restored).toEqual(SEED[1]);
+      expect(await firstValueFrom(service.getAll())).toEqual(SEED);
+    });
+
+    it('rejects a hero whose name was taken in the meantime', async () => {
+      await firstValueFrom(service.delete(2));
+      await firstValueFrom(
+        service.create({
+          name: 'Superman',
+          realName: 'Kal-El',
+          publisher: 'DC',
+          firstAppearance: 1938,
+        }),
+      );
+
+      await expect(firstValueFrom(service.restore(SEED[1]))).rejects.toBeInstanceOf(
+        DuplicateHeroNameError,
+      );
+    });
+
+    it('rejects a hero that still exists', async () => {
+      await expect(firstValueFrom(service.restore(SEED[0]))).rejects.toBeInstanceOf(
+        DuplicateHeroNameError,
+      );
+    });
+  });
+
   it('never exposes the internal state for mutation', async () => {
     const heroes = await firstValueFrom(service.getAll());
 

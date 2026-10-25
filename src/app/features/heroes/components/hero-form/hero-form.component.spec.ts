@@ -111,6 +111,68 @@ describe('HeroFormComponent', () => {
     expect(button?.disabled).toBe(true);
   });
 
+  it('focuses the first invalid field when saving fails', async () => {
+    type('name', 'thor');
+    await submit();
+
+    expect(document.activeElement).toBe(field('realName'));
+  });
+
+  it('explains each field with a hint and counts the name characters', async () => {
+    type('name', 'flash');
+    await fixture.whenStable();
+
+    const hints = Array.from(element().querySelectorAll('mat-hint'), (hint) =>
+      hint.textContent?.trim(),
+    );
+    expect(hints).toEqual(
+      expect.arrayContaining(['Shown in upper case and unique', '5/40', 'Secret identity']),
+    );
+  });
+
+  it('previews the hero while the user types', async () => {
+    type('name', 'storm');
+    type('realName', 'Ororo Munroe');
+    await fixture.whenStable();
+
+    const preview = element().querySelector('app-hero-preview');
+    expect(preview?.textContent).toContain('STORM');
+    expect(preview?.textContent).toContain('Ororo Munroe');
+  });
+
+  describe('change tracking', () => {
+    const saveButton = (): HTMLButtonElement =>
+      element().querySelector('button[type="submit"]') as HTMLButtonElement;
+
+    beforeEach(async () => {
+      fixture.componentRef.setInput('hero', HERO_FIXTURES[3]);
+      await fixture.whenStable();
+    });
+
+    it('only allows saving an edit once something changed', async () => {
+      expect(saveButton().disabled).toBe(true);
+
+      type('realName', 'Dick Grayson');
+      await fixture.whenStable();
+
+      expect(saveButton().disabled).toBe(false);
+    });
+
+    it('reports unsaved changes, and none after reverting them', async () => {
+      const changes = vi.fn();
+      fixture.componentInstance.changed.subscribe(changes);
+
+      type('realName', 'Dick Grayson');
+      await fixture.whenStable();
+      expect(changes).toHaveBeenLastCalledWith(true);
+
+      type('realName', 'Bruce Wayne');
+      await fixture.whenStable();
+      expect(changes).toHaveBeenLastCalledWith(false);
+      expect(saveButton().disabled).toBe(true);
+    });
+  });
+
   it('emits cancelled', () => {
     element().querySelector<HTMLButtonElement>('[data-testid="cancel"]')?.click();
 

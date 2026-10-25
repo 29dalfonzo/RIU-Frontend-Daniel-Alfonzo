@@ -1,22 +1,30 @@
 # RIU Frontend – Super Heroes
 
+**English** | [Español](README.es.md)
+
 Single-page application to maintain a catalogue of super heroes, built for the Mindata frontend technical test.
 
 ## Stack
 
-| Tool | Version |
-| --- | --- |
+| Tool                          | Version                        |
+| ----------------------------- | ------------------------------ |
 | Angular (core, router, forms) | 21.2.25 (latest LTS line, v21) |
-| Angular CLI / build | 21.2.28 |
-| Angular Material / CDK | 21.2.14 |
-| RxJS | 7.8 |
-| TypeScript | 5.9 |
-| Vitest (+ coverage-v8) | 4.1 |
-| Playwright | 1.64 |
-| angular-eslint / Prettier | 21.4 / 3.8 |
-| Node.js | 24 LTS |
+| Angular CLI / build           | 21.2.28                        |
+| Angular Material / CDK        | 21.2.14                        |
+| RxJS                          | 7.8                            |
+| TypeScript                    | 5.9                            |
+| Vitest (+ coverage-v8)        | 4.1                            |
+| Playwright                    | 1.64                           |
+| angular-eslint / Prettier     | 21.4 / 3.8                     |
+| Node.js                       | 24 LTS                         |
 
 Standalone components, zoneless change detection, signals, `OnPush` and the new control flow (`@if`, `@for`) are used throughout.
+
+### Why Angular 21
+
+The test asks for _"the latest LTS version of Angular and of any library used in the project"_. Angular 21 is the newest line in Long-Term Support (npm tag `v21-lts`, 21.2.25), while Angular 22 is the current active release and is not LTS yet, so the project targets 21.
+
+Every other dependency is on its newest release compatible with Angular 21. The only newer majors available (Vitest 5, TypeScript 7) are outside the ranges Angular 21's tooling supports (`@angular/build` requires `vitest ^4` and TypeScript `>=5.9 <6.0`). Moving to Angular 22 later is a standard `ng update`.
 
 ## Getting started
 
@@ -48,35 +56,35 @@ docker build --target test .
 
 ## Scripts
 
-| Script | Description |
-| --- | --- |
-| `npm start` | Dev server with live reload |
-| `npm run build` | Production build into `dist/` |
-| `npm test` | Unit tests in watch mode |
-| `npm run test:ci` | Unit tests once |
+| Script                  | Description                                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------------------- |
+| `npm start`             | Dev server with live reload                                                                 |
+| `npm run build`         | Production build into `dist/`                                                               |
+| `npm test`              | Unit tests in watch mode                                                                    |
+| `npm run test:ci`       | Unit tests once                                                                             |
 | `npm run test:coverage` | Unit tests once with coverage; **fails below 80%** (statements, branches, functions, lines) |
-| `npm run e2e` | Playwright end-to-end tests (desktop + mobile Chrome), starts its own dev server |
-| `npm run lint` | angular-eslint (TypeScript + template accessibility rules) |
-| `npm run format` | Prettier |
+| `npm run e2e`           | Playwright end-to-end tests (desktop + mobile Chrome), starts its own dev server            |
+| `npm run lint`          | angular-eslint (TypeScript + template accessibility rules)                                  |
+| `npm run format`        | Prettier                                                                                    |
 
 ## Requirements coverage
 
-| Requirement | Where |
-| --- | --- |
-| Register, list, get by id, search by name, update and delete heroes | `HeroService` (`features/heroes/data-access`) |
-| Search by name: `man` → `SPIDERMAN`, `SUPERMAN`, `MANOLITO EL FUERTE`… | `HeroService.searchByName` (case-insensitive, trimmed) |
-| Data kept inside the service, no backend | Signal-based in-memory store seeded with sample heroes |
-| Paginated list with add, edit and delete buttons | `HeroListPageComponent` + `HeroTableComponent` (Material table and paginator) |
-| Filter input above the list | `HeroSearchComponent` (debounced) |
-| Empty form with validations, back to the list after saving | `HeroFormComponent` + `HeroFormPageComponent` on `/heroes/new` |
-| Pre-filled edit form, back to the list after saving | Same components on `/heroes/:id/edit` |
-| Confirmation before deleting | `ConfirmDialogService` (Material dialog) |
-| Unit tests for the service and components | `*.spec.ts` next to every unit |
-| *Optional:* Angular Material | Material 3 theme, table, paginator, form fields, dialog, snackbar, progress bar |
-| *Optional:* Routes and navigation | Lazy-loaded `heroes` feature with router input binding |
-| *Optional:* Loading interceptor | `loadingInterceptor` + `LoadingService` (see decisions below) |
-| *Optional:* Upper-case directive for the name | `UppercaseDirective` (`appUppercase`) |
-| *Optional:* Event-driven component communication | Presentational components only talk through `input()` / `output()` / `model()` |
+| Requirement                                                            | Where                                                                           |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Register, list, get by id, search by name, update and delete heroes    | `HeroService` (`features/heroes/data-access`)                                   |
+| Search by name: `man` → `SPIDERMAN`, `SUPERMAN`, `MANOLITO EL FUERTE`… | `HeroService.searchByName` (case-insensitive, trimmed)                          |
+| Data kept inside the service, no backend                               | Signal-based in-memory store seeded with sample heroes                          |
+| Paginated list with add, edit and delete buttons                       | `HeroListPageComponent` + `HeroTableComponent` (Material table and paginator)   |
+| Filter input above the list                                            | `HeroSearchComponent` (debounced)                                               |
+| Empty form with validations, back to the list after saving             | `HeroFormComponent` + `HeroFormPageComponent` on `/heroes/new`                  |
+| Pre-filled edit form, back to the list after saving                    | Same components on `/heroes/:id/edit`                                           |
+| Confirmation before deleting                                           | `ConfirmDialogService` (Material dialog)                                        |
+| Unit tests for the service and components                              | `*.spec.ts` next to every unit                                                  |
+| _Optional:_ Angular Material                                           | Material 3 theme, table, paginator, form fields, dialog, snackbar, progress bar |
+| _Optional:_ Routes and navigation                                      | Lazy-loaded `heroes` feature with router input binding                          |
+| _Optional:_ Loading interceptor                                        | `loadingInterceptor` + `LoadingService` (see decisions below)                   |
+| _Optional:_ Upper-case directive for the name                          | `UppercaseDirective` (`appUppercase`)                                           |
+| _Optional:_ Event-driven component communication                       | Presentational components only talk through `input()` / `output()` / `model()`  |
 
 ## Project structure
 
@@ -98,24 +106,24 @@ src/app
         └── heroes.routes.ts
 ```
 
-Each folder describes *what* it holds, so the feature is readable without opening files. Containers (`pages/`) own state and side effects. Presentational components (`components/`) only receive inputs and emit events.
+Each folder describes _what_ it holds, so the feature is readable without opening files. Containers (`pages/`) own state and side effects. Presentational components (`components/`) only receive inputs and emit events.
 
 ## UI and UX
 
-The interface uses a **comic theme built on Angular Material 3**: the Material theme is generated with a red primary, yellow tertiary and the *Bangers* display font, and a small set of CSS tokens (`--app-ink`, `--app-outline`, `--app-shadow`…) adds ink outlines, offset shadows and a halftone background. Components keep using Material; only tokens and a few layout classes are custom.
+The interface uses a **comic theme built on Angular Material 3**: the Material theme is generated with a red primary, yellow tertiary and the _Bangers_ display font, and a small set of CSS tokens (`--app-ink`, `--app-outline`, `--app-shadow`…) adds ink outlines, offset shadows and a halftone background. Components keep using Material; only tokens and a few layout classes are custom.
 
-| Area | What it does |
-| --- | --- |
-| Theme | Light and dark themes (`theme-type: color-scheme`), toggle in the header; follows the OS by default and remembers the choice |
-| URL state | Filter, page, page size and sort live in the query string (`?q=man&page=2&sort=name:asc`): reload, shared links and back/forward restore the same view, and forms return to it |
-| List | Sortable columns, initials avatars, publisher badges (white text ≥ 4.98:1 contrast), first-load skeleton, empty state with *Clear filter* / *Add hero*, `aria-live` result count, `/` focuses the search |
-| Saving | Back on the list, the saved hero is highlighted if it is on screen; otherwise the user stays where they were and the snackbar offers *View*, which jumps to its page (clearing a filter that hides it) |
-| Delete | Confirmation dialog with the hero name and a danger action (focus starts on *Cancel*), then *Undo* in the snackbar |
-| Notifications | Custom comic snackbar (`NotificationComponent`) in three variants: success (yellow), info with an action such as *Undo* or *View* (ink) and error (red), each with an icon and a dismiss button |
-| Pagination | First, previous, next and last page buttons, page sizes 5/10/25 |
-| Form | Breadcrumb, hints and name counter, live trading-card preview, focus on the first invalid field, *Save* disabled until an edit changes something, and a guard that asks before discarding unsaved changes |
-| Mobile | Mobile-first layouts: the table keeps only name (with publisher) and actions, the preview becomes a compact card |
-| Motion | Highlight, skeleton and card animations are disabled with `prefers-reduced-motion` |
+| Area          | What it does                                                                                                                                                                                              |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Theme         | Light and dark themes (`theme-type: color-scheme`), toggle in the header; follows the OS by default and remembers the choice                                                                              |
+| URL state     | Filter, page, page size and sort live in the query string (`?q=man&page=2&sort=name:asc`): reload, shared links and back/forward restore the same view, and forms return to it                            |
+| List          | Sortable columns, initials avatars, publisher badges (white text ≥ 4.98:1 contrast), first-load skeleton, empty state with _Clear filter_ / _Add hero_, `aria-live` result count, `/` focuses the search  |
+| Saving        | Back on the list, the saved hero is highlighted if it is on screen; otherwise the user stays where they were and the snackbar offers _View_, which jumps to its page (clearing a filter that hides it)    |
+| Delete        | Confirmation dialog with the hero name and a danger action (focus starts on _Cancel_), then _Undo_ in the snackbar                                                                                        |
+| Notifications | Custom comic snackbar (`NotificationComponent`) in three variants: success (yellow), info with an action such as _Undo_ or _View_ (ink) and error (red), each with an icon and a dismiss button           |
+| Pagination    | First, previous, next and last page buttons, page sizes 5/10/25                                                                                                                                           |
+| Form          | Breadcrumb, hints and name counter, live trading-card preview, focus on the first invalid field, _Save_ disabled until an edit changes something, and a guard that asks before discarding unsaved changes |
+| Mobile        | Mobile-first layouts: the table keeps only name (with publisher) and actions, the preview becomes a compact card                                                                                          |
+| Motion        | Highlight, skeleton and card animations are disabled with `prefers-reduced-motion`                                                                                                                        |
 
 ## Design decisions
 
@@ -123,8 +131,8 @@ The interface uses a **comic theme built on Angular Material 3**: the Material t
 
 ```ts
 interface Hero {
-  readonly id: HeroId;          // number, generated by the store
-  readonly name: string;        // unique, stored in upper case
+  readonly id: HeroId; // number, generated by the store
+  readonly name: string; // unique, stored in upper case
   readonly realName: string;
   readonly publisher: Publisher; // 'Marvel' | 'DC' | 'Other', derived from a const tuple
   readonly firstAppearance: number;
@@ -161,12 +169,12 @@ The header shows a Material progress bar while `isLoading()` is true. If a real 
 
 ### Validations
 
-| Field | Rules |
-| --- | --- |
-| Name | required, 2–40 characters, unique (checked by the service) |
-| Real name | required, max 60 characters |
-| Publisher | required, one of `Marvel`, `DC`, `Other` |
-| First appearance | required, between 1900 and the current year |
+| Field            | Rules                                                      |
+| ---------------- | ---------------------------------------------------------- |
+| Name             | required, 2–40 characters, unique (checked by the service) |
+| Real name        | required, max 60 characters                                |
+| Publisher        | required, one of `Marvel`, `DC`, `Other`                   |
+| First appearance | required, between 1900 and the current year                |
 
 Errors appear once a field is touched or the form is submitted. The form is fully typed (`NonNullableFormBuilder`).
 
@@ -179,7 +187,7 @@ Errors appear once a field is touched or the form is submitted. The form is full
 
 ### End-to-end
 
-`npm run e2e` runs [Playwright](https://playwright.dev) against a real dev server, on desktop and mobile (Pixel 7) Chrome. The suite covers pagination, filtering and clearing the filter, restoring state from a shared link, creating with validations and upper case (then *View* to jump to the new hero), rejecting a duplicate name, editing, confirming, cancelling and undoing a deletion, the unsaved-changes guard, the theme toggle, the loading bar, and redirecting an unknown hero id. The first run needs the browser: `npx playwright install chromium`.
+`npm run e2e` runs [Playwright](https://playwright.dev) against a real dev server, on desktop and mobile (Pixel 7) Chrome. The suite covers pagination, filtering and clearing the filter, restoring state from a shared link, creating with validations and upper case (then _View_ to jump to the new hero), rejecting a duplicate name, editing, confirming, cancelling and undoing a deletion, the unsaved-changes guard, the theme toggle, the loading bar, and redirecting an unknown hero id. The first run needs the browser: `npx playwright install chromium`.
 
 ## Commit convention
 

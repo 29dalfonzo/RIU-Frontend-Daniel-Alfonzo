@@ -111,6 +111,8 @@ The interface uses a **comic theme built on Angular Material 3**: the Material t
 | List | Sortable columns, initials avatars, publisher badges (white text ≥ 4.98:1 contrast), first-load skeleton, empty state with *Clear filter* / *Add hero*, `aria-live` result count, `/` focuses the search |
 | Saving | Back on the list, the saved hero is highlighted if it is on screen; otherwise the user stays where they were and the snackbar offers *View*, which jumps to its page (clearing a filter that hides it) |
 | Delete | Confirmation dialog with the hero name and a danger action (focus starts on *Cancel*), then *Undo* in the snackbar |
+| Notifications | Custom comic snackbar (`NotificationComponent`) in three variants: success (yellow), info with an action such as *Undo* or *View* (ink) and error (red), each with an icon and a dismiss button |
+| Pagination | First, previous, next and last page buttons, page sizes 5/10/25 |
 | Form | Breadcrumb, hints and name counter, live trading-card preview, focus on the first invalid field, *Save* disabled until an edit changes something, and a guard that asks before discarding unsaved changes |
 | Mobile | Mobile-first layouts: the table keeps only name (with publisher) and actions, the preview becomes a compact card |
 | Motion | Highlight, skeleton and card animations are disabled with `prefers-reduced-motion` |

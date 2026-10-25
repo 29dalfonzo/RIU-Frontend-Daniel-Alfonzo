@@ -123,6 +123,32 @@ describe('HeroFormPageComponent', () => {
     });
   });
 
+  describe('navigation safety', () => {
+    it('shows a breadcrumb back to the list view the user came from', async () => {
+      await render('4');
+
+      const crumb = element().querySelector<HTMLAnchorElement>('nav[aria-label="Breadcrumb"] a');
+      expect(crumb?.textContent?.trim()).toBe('Heroes');
+      expect(crumb?.getAttribute('href')).toBe('/heroes?q=man&page=2');
+      expect(element().querySelector('[aria-current="page"]')?.textContent?.trim()).toBe(
+        'Edit BATMAN',
+      );
+    });
+
+    it('reports unsaved changes only while the form differs from the saved hero', async () => {
+      await render('4');
+      const page = fixture.componentInstance;
+      expect(page.hasUnsavedChanges()).toBe(false);
+
+      type('realName', 'Dick Grayson');
+      await settle(fixture);
+      expect(page.hasUnsavedChanges()).toBe(true);
+
+      await submit();
+      expect(page.hasUnsavedChanges()).toBe(false);
+    });
+  });
+
   describe('edit mode', () => {
     it('loads the selected hero, saves the changes and returns to the list', async () => {
       await render('4');

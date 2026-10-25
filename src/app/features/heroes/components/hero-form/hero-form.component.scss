@@ -1,11 +1,45 @@
+// Mobile first: preview on top, so the user sees the card while scrolling the form.
+.layout {
+  display: grid;
+  gap: 24px;
+}
+
+.preview {
+  order: -1;
+}
+
 .hero-form {
   display: grid;
-  gap: 8px;
-  max-width: 560px;
+  gap: 12px;
+}
+
+.row {
+  display: grid;
+  gap: 12px;
 }
 
 .actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+  margin-top: 8px;
+}
+
+@media (min-width: 768px) {
+  .row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+    align-items: start;
+  }
+
+  .preview {
+    order: 0;
+    position: sticky;
+    top: 96px;
+  }
 }

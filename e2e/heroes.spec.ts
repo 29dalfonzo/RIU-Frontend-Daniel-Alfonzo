@@ -99,7 +99,8 @@ test.describe('Super heroes maintenance', () => {
 
   test('deletes a hero only after confirmation', async () => {
     await heroes.rowAction('Delete', 'SUPERMAN').click();
-    await expect(heroes.dialog).toContainText('Are you sure you want to delete SUPERMAN?');
+    await expect(heroes.dialog).toContainText('Delete hero');
+    await expect(heroes.dialog).toContainText('SUPERMAN');
     await heroes.dialog.getByRole('button', { name: 'Cancel' }).click();
     await expect(heroes.heroNames).toContainText(['SUPERMAN']);
 
@@ -108,6 +109,17 @@ test.describe('Super heroes maintenance', () => {
 
     await expect(heroes.snackbar).toContainText('SUPERMAN was deleted');
     await expect(heroes.heroNames).not.toContainText(['SUPERMAN']);
+  });
+
+  test('undoes a deletion from the snackbar', async () => {
+    await heroes.rowAction('Delete', 'BATMAN').click();
+    await heroes.dialog.getByRole('button', { name: 'Delete' }).click();
+    await expect(heroes.heroNames).not.toContainText(['BATMAN']);
+
+    await heroes.snackbar.getByRole('button', { name: 'Undo' }).click();
+
+    await expect(heroes.snackbar).toContainText('BATMAN was restored');
+    await expect(heroes.heroNames).toContainText(['BATMAN']);
   });
 
   test('shows the loading bar while an operation runs', async ({ page }) => {

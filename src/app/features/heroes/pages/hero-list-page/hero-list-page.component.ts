@@ -24,6 +24,7 @@ import {
   map,
   switchMap,
   take,
+  tap,
 } from 'rxjs';
 
 import { ConfirmDialogService } from '../../../../shared/ui/confirm-dialog/confirm-dialog.service';
@@ -195,17 +196,22 @@ export class HeroListPageComponent {
     this.confirmDialog
       .confirm({
         title: 'Delete hero',
-        message: `Are you sure you want to delete ${hero.name}?`,
+        subject: hero.name,
+        message: 'This hero will leave the registry. You can undo it right after.',
         confirmLabel: 'Delete',
+        danger: true,
       })
       .pipe(
         filter(Boolean),
         switchMap(() => this.heroService.delete(hero.id)),
+        tap(() => this.reload$.next()),
+        switchMap(() => this.notifications.action(`${hero.name} was deleted`, 'Undo')),
+        switchMap(() => this.heroService.restore(hero)),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => {
-          this.notifications.success(`${hero.name} was deleted`);
+          this.notifications.success(`${hero.name} was restored`);
           this.reload$.next();
         },
         error: (error: Error) => this.notifications.error(error.message),

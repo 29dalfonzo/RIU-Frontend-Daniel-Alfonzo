@@ -84,6 +84,21 @@ export class HeroService {
     });
   }
 
+  /** Puts a deleted hero back with its original id and position (used by "Undo"). */
+  restore(deleted: Hero): Observable<Hero> {
+    return this.respond(() => {
+      const hero = normalize(deleted);
+      if (this.heroes().some((current) => current.id === hero.id || current.name === hero.name)) {
+        throw new DuplicateHeroNameError(hero.name);
+      }
+      const heroes = [...this.heroes()];
+      const position = heroes.findIndex((current) => current.id > hero.id);
+      heroes.splice(position < 0 ? heroes.length : position, 0, hero);
+      this.commit(heroes);
+      return this.findOrFail(hero.id);
+    });
+  }
+
   /** Runs the operation lazily, on subscription, once the simulated latency has elapsed. */
   private respond<T>(operation: () => T): Observable<T> {
     return timer(this.latencyMs).pipe(

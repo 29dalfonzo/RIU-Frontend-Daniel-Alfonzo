@@ -14,6 +14,7 @@ export class ConfirmDialogService {
       .open<ConfirmDialogComponent, ConfirmDialogData, boolean>(ConfirmDialogComponent, {
         data,
         width: '400px',
+        panelClass: 'comic-dialog',
       })
       .afterClosed()
       .pipe(map((confirmed) => confirmed === true));

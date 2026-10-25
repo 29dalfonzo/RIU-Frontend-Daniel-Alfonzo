@@ -41,6 +41,24 @@ describe('ConfirmDialogService', () => {
     expect(await answer('Delete')).toBe(true);
   });
 
+  it('emphasizes the subject and marks destructive actions', async () => {
+    service
+      .confirm({
+        title: 'Delete hero',
+        subject: 'SUPERMAN',
+        message: 'This hero will leave the registry.',
+        confirmLabel: 'Delete',
+        danger: true,
+      })
+      .subscribe();
+
+    const dialog = await loader.getHarness(MatDialogHarness);
+    const host = await dialog.host();
+    expect(await host.text()).toContain('SUPERMAN');
+    const confirm = await dialog.getHarness(MatButtonHarness.with({ text: 'Delete' }));
+    expect(await (await confirm.host()).hasClass('danger')).toBe(true);
+  });
+
   it('resolves false when the user cancels', async () => {
     expect(await answer('Cancel')).toBe(false);
   });

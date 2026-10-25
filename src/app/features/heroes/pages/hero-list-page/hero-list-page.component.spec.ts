@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { of } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
 
 import { ConfirmDialogService } from '../../../../shared/ui/confirm-dialog/confirm-dialog.service';
 import { NotificationService } from '../../../../shared/ui/notification/notification.service';
@@ -18,7 +18,7 @@ describe('HeroListPageComponent', () => {
   let harness: RouterTestingHarness;
   let router: Router;
   const confirm = vi.fn();
-  const notifications = { success: vi.fn(), error: vi.fn() };
+  const notifications = { success: vi.fn(), error: vi.fn(), action: vi.fn() };
 
   const element = (): HTMLElement => harness.routeNativeElement as HTMLElement;
   const renderedNames = (): string[] =>
@@ -47,6 +47,7 @@ describe('HeroListPageComponent', () => {
     confirm.mockReset();
     notifications.success.mockReset();
     notifications.error.mockReset();
+    notifications.action.mockReset().mockReturnValue(EMPTY);
 
     TestBed.configureTestingModule({
       providers: [
@@ -223,10 +224,20 @@ describe('HeroListPageComponent', () => {
       await click('button[aria-label="Delete SUPERMAN"]');
 
       expect(confirm).toHaveBeenCalledWith(
-        expect.objectContaining({ message: expect.stringContaining('SUPERMAN') }),
+        expect.objectContaining({ subject: 'SUPERMAN', danger: true, confirmLabel: 'Delete' }),
       );
       expect(renderedNames()).not.toContain('SUPERMAN');
-      expect(notifications.success).toHaveBeenCalledWith('SUPERMAN was deleted');
+      expect(notifications.action).toHaveBeenCalledWith('SUPERMAN was deleted', 'Undo');
+    });
+
+    it('brings the hero back when the user clicks Undo', async () => {
+      confirm.mockReturnValue(of(true));
+      notifications.action.mockReturnValue(of(undefined));
+
+      await click('button[aria-label="Delete SUPERMAN"]');
+
+      expect(renderedNames()).toContain('SUPERMAN');
+      expect(notifications.success).toHaveBeenCalledWith('SUPERMAN was restored');
     });
 
     it('keeps the hero when the user cancels', async () => {
@@ -235,7 +246,7 @@ describe('HeroListPageComponent', () => {
       await click('button[aria-label="Delete SUPERMAN"]');
 
       expect(renderedNames()).toContain('SUPERMAN');
-      expect(notifications.success).not.toHaveBeenCalled();
+      expect(notifications.action).not.toHaveBeenCalled();
     });
 
     it('keeps the active filter after deleting', async () => {

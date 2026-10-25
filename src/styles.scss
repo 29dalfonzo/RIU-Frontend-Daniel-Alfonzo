@@ -93,3 +93,8 @@ body {
     padding: 24px;
   }
 }
+
+.comic-dialog .mat-mdc-dialog-surface {
+  border: var(--app-border-width) solid var(--app-outline);
+  box-shadow: var(--app-shadow);
+}

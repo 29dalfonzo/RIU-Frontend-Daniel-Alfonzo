@@ -13,6 +13,7 @@ import { EMPTY, Observable, catchError, finalize, of, switchMap } from 'rxjs';
 
 import { NotificationService } from '../../../../shared/ui/notification/notification.service';
 import { HeroFormComponent } from '../../components/hero-form/hero-form.component';
+import { HeroListQueryService } from '../../data-access/hero-list-query.service';
 import { HeroService } from '../../data-access/hero.service';
 import { Hero, HeroDraft, HeroId } from '../../models/hero.model';
 
@@ -31,6 +32,7 @@ export class HeroFormPageComponent {
   private readonly heroService = inject(HeroService);
   private readonly notifications = inject(NotificationService);
   private readonly router = inject(Router);
+  private readonly listQuery = inject(HeroListQueryService);
   private readonly destroyRef = inject(DestroyRef);
 
   /** Bound from the `:id` route parameter; absent when creating. */
@@ -67,7 +69,7 @@ export class HeroFormPageComponent {
   }
 
   protected backToList(): void {
-    void this.router.navigate(['/heroes']);
+    void this.router.navigate(['/heroes'], { queryParams: this.listQuery.lastQuery() });
   }
 
   private loadHero(id: HeroId): Observable<Hero> {

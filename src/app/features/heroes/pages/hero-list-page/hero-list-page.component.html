@@ -7,9 +7,19 @@
     </button>
   </header>
 
-  <app-hero-search [(term)]="term" />
+  <app-hero-search [term]="term()" (termChange)="onTermChange($event)" />
 
-  @if (heroes(); as heroes) {
-    <app-hero-table [heroes]="heroes" (edit)="onEdit($event)" (remove)="onRemove($event)" />
+  @if (sortedHeroes(); as heroes) {
+    <app-hero-table
+      [heroes]="heroes"
+      [pageIndex]="pageIndex()"
+      [pageSize]="size()"
+      [pageSizeOptions]="pageSizeOptions"
+      [sort]="sort()"
+      (pageChange)="onPage($event)"
+      (sortChange)="onSort($event)"
+      (edit)="onEdit($event)"
+      (remove)="onRemove($event)"
+    />
   }
 </section>

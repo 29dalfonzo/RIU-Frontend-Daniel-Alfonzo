@@ -57,6 +57,19 @@ describe('HeroTableComponent', () => {
     );
   });
 
+  it('offers first and last page shortcuts', async () => {
+    const pageChanges = vi.fn();
+    fixture.componentInstance.pageChange.subscribe(pageChanges);
+    const paginator = await loader.getHarness(MatPaginatorHarness);
+
+    await paginator.goToLastPage();
+    expect(pageChanges).toHaveBeenLastCalledWith(expect.objectContaining({ pageIndex: 1 }));
+
+    await setInputs({ pageIndex: 1 });
+    await paginator.goToFirstPage();
+    expect(pageChanges).toHaveBeenLastCalledWith(expect.objectContaining({ pageIndex: 0 }));
+  });
+
   it('emits the new sort when a column header is clicked', async () => {
     const sortChanges = vi.fn();
     fixture.componentInstance.sortChange.subscribe(sortChanges);

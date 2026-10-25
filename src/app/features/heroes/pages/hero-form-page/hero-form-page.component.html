@@ -1,0 +1,14 @@
+<section class="page">
+  @if (!isEdit()) {
+    <h1>New hero</h1>
+    <app-hero-form [busy]="saving()" (save)="onSave($event)" (cancelled)="backToList()" />
+  } @else if (hero(); as hero) {
+    <h1>Edit {{ hero.name }}</h1>
+    <app-hero-form
+      [hero]="hero"
+      [busy]="saving()"
+      (save)="onSave($event)"
+      (cancelled)="backToList()"
+    />
+  }
+</section>
